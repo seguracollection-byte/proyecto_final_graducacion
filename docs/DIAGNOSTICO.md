@@ -56,3 +56,7 @@ A solicitud del usuario, las carpetas se renombraron a `lomas-frontend` y `lomas
 El 23/10/2026 el usuario confirmó con capturas la versión efectiva MariaDB 10.4.28, puerto 3306, creación de lomas_eveneser_dev (utf8mb4_unicode_ci), cuenta lomas_app_dev@localhost y sus cuatro permisos de datos. Acceso TCP confirmado y base sin tablas. Esto resuelve los pendientes de identificación del servidor y creación de la base señalados en el diagnóstico inicial.
 
 Se agregó npm run db:check, consulta de solo lectura con configuración exclusiva .env.lomas.local, sin usar credenciales anteriores. Dos pruebas automatizadas aprobadas: aislamiento de rutas y rechazo de configuraciones de BD ajenas. Prueba real desde Node aprobada el 23/10/2026 tras configurar el usuario su contraseña localmente: base lomas_eveneser_dev, cuenta lomas_app_dev@localhost y versión 10.4.28-MariaDB. El intento dentro del sandbox falló; la repetición con acceso local autorizado pasó. No se modificaron datos ni se enviaron correos. No se habilitó la API heredada.
+
+## Revisión posterior de dependencias
+
+AsyncStorage ajustado a 2.2.0 y Axios a 1.20.0. mysql2 actualizado a 3.24.6 y correcciones puntuales en shell-quote, proxy-addr, qs y brace-expansion. Dos pruebas backend y conexión MariaDB aprobadas; validación offline Expo sin incompatibilidades y bundles Android/iOS compilados. Auditoría posterior: backend 1 alto, frontend 25 (8 moderados y 17 altos), sin críticos reportados. Quedan pendientes documentados en DEPENDENCIAS.md; no se aplicó actualización general ni cambio de SDK.

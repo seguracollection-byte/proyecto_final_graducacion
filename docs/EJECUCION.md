@@ -20,7 +20,7 @@ EXPO_OFFLINE=1 npx --no-install expo start --localhost --port 8082
 
 El arranque local de Metro está comprobado; las pantallas siguen siendo de barbería y no están listas para un piloto. No utilizar cuentas anteriores. Para Expo Go físico hará falta LAN y una versión compatible; el backend actual sigue cerrado a loopback. En teléfono, localhost identifica el teléfono; Android Emulator usa normalmente 10.0.2.2 para acceder a la Mac. Tras implementar la API segura se configurará EXPO_PUBLIC_API_URL con la dirección adecuada. Nunca poner contraseñas ni JWT_SECRET en EXPO_PUBLIC_*.
 
-`npx --no-install expo install --check` permite revisar compatibilidad; AsyncStorage requiere evaluar el ajuste puntual a 2.2.0. No aplicar cambios masivos. Para Xcode se aceptó la licencia manualmente por el usuario. Android Studio y Xcode están instalados, pero no se han ejecutado simuladores ni compilaciones nativas completas.
+`npx --no-install expo install --check` permite revisar compatibilidad; AsyncStorage ya se fijó en 2.2.0 y la comprobación local pasó; ver DEPENDENCIAS.md para límites y avisos restantes. No aplicar cambios masivos. Para Xcode se aceptó la licencia manualmente por el usuario. Android Studio y Xcode están instalados, pero no se han ejecutado simuladores ni compilaciones nativas completas.
 
 ## Base separada: creada y acceso por Terminal confirmado
 
