@@ -39,6 +39,6 @@ npm run db:check
 
 El script lee exclusivamente `.env.lomas.local`, sin cargar el .env heredado ni combinar variables de entorno. Solo admite host 127.0.0.1, puerto 3306, base lomas_eveneser_dev y usuario lomas_app_dev. Ejecuta un SELECT para comprobar base, cuenta y versión. Cierra la conexión y no crea tablas, modifica datos ni envía correos. El resultado esperado identifica la base nueva y lomas_app_dev@localhost.
 
-En otra copia del proyecto, crear el archivo local a partir de `.env.lomas.example`. No subirlo a Git. `npm start` sigue en modo diagnóstico: no abre la BD ni habilita rutas heredadas. La conexión desde Node queda pendiente hasta que el usuario configure su contraseña local y ejecute db:check.
+En otra copia del proyecto, crear el archivo local a partir de `.env.lomas.example`. No subirlo a Git. `npm start` sigue en modo diagnóstico: no abre la BD ni habilita rutas heredadas. Conexión desde Node comprobada el 23/10/2026 con `npm run db:check`: base lomas_eveneser_dev, cuenta lomas_app_dev@localhost, MariaDB 10.4.28. El archivo local con la contraseña permanece excluido de Git.
 
 Diseñar migraciones ganaderas antes de crear tablas; se aplicarán con una cuenta administrativa separada, no ampliando permisos del usuario de la aplicación. El esquema database/legacy es solo referencia. Respaldos reales fuera de GitHub y con restauración verificada en otra base.
