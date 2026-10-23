@@ -46,3 +46,7 @@ Auditoría npm del 23/10/2026: backend 5 dependencias con avisos (2 moderados, 2
 ## Límites
 
 Faltan servidor de desarrollo separado, cuenta con privilegios mínimos, pruebas funcionales Android/iOS, autenticación segura, resolución de compatibilidad y evaluación de avisos. No es todavía una aplicación ganadera utilizable. No se promete ausencia de vulnerabilidades.
+
+## Organización de carpetas
+
+A solicitud del usuario, las carpetas se renombraron a `lomas-frontend` y `lomas-backend`, junto con los nombres de paquetes, el nombre/slug de Expo y las instrucciones de ejecución. Los respaldos locales conservan sus nombres históricos.

@@ -1,6 +1,6 @@
 # Lomas Eveneser — práctica profesional
 
-Aplicación prevista para cinco personas autorizadas de una finca ganadera en Tilarán, Costa Rica. Preparación iniciada el 23 de octubre de 2026. Esta etapa conserva nombres de carpetas heredados; todavía no implementa los módulos ganaderos.
+Aplicación prevista para cinco personas autorizadas de una finca ganadera en Tilarán, Costa Rica. Preparación iniciada el 23 de octubre de 2026. El código está organizado en `lomas-frontend` y `lomas-backend`; todavía no implementa los módulos ganaderos.
 
 - [Diagnóstico y resultados](docs/DIAGNOSTICO.md)
 - [Ejecución segura](docs/EJECUCION.md)

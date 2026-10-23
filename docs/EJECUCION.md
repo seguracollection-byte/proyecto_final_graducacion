@@ -3,7 +3,7 @@
 ## Backend de diagnóstico
 
 ```sh
-cd barberia-backend
+cd lomas-backend
 npm start
 ```
 
@@ -14,7 +14,7 @@ Se conservaron ambos package.json y package-lock.json; ya existían node_modules
 ## Frontend heredado
 
 ```sh
-cd barberia-frontend
+cd lomas-frontend
 EXPO_OFFLINE=1 npx --no-install expo start --localhost --port 8082
 ```
 
