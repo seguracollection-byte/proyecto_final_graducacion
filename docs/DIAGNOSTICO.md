@@ -50,3 +50,9 @@ Faltan servidor de desarrollo separado, cuenta con privilegios mínimos, pruebas
 ## Organización de carpetas
 
 A solicitud del usuario, las carpetas se renombraron a `lomas-frontend` y `lomas-backend`, junto con los nombres de paquetes, el nombre/slug de Expo y las instrucciones de ejecución. Los respaldos locales conservan sus nombres históricos.
+
+## Avance de base de desarrollo
+
+El 23/10/2026 el usuario confirmó con capturas la versión efectiva MariaDB 10.4.28, puerto 3306, creación de lomas_eveneser_dev (utf8mb4_unicode_ci), cuenta lomas_app_dev@localhost y sus cuatro permisos de datos. Acceso TCP confirmado y base sin tablas. Esto resuelve los pendientes de identificación del servidor y creación de la base señalados en el diagnóstico inicial.
+
+Se agregó npm run db:check, consulta de solo lectura con configuración exclusiva .env.lomas.local, sin usar credenciales anteriores. Dos pruebas automatizadas aprobadas: aislamiento de rutas y rechazo de configuraciones de BD ajenas. Prueba real desde Node pendiente de ingresar la nueva contraseña localmente. No se habilitó la API heredada.

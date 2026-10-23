@@ -22,12 +22,23 @@ El arranque local de Metro está comprobado; las pantallas siguen siendo de barb
 
 `npx --no-install expo install --check` permite revisar compatibilidad; AsyncStorage requiere evaluar el ajuste puntual a 2.2.0. No aplicar cambios masivos. Para Xcode se aceptó la licencia manualmente por el usuario. Android Studio y Xcode están instalados, pero no se han ejecutado simuladores ni compilaciones nativas completas.
 
-## Preparar la base separada (pendiente, no ejecutado)
+## Base separada: creada y acceso por Terminal confirmado
 
-1. Confirmar qué servidor local se usará. El cliente de XAMPP es MariaDB, aunque MySQL Workbench también está instalado; Workbench no demuestra que haya un servidor MySQL.
-2. Desde una sesión administrativa local del servidor elegido ejecutar `SELECT VERSION();`. No usar ni copiar las credenciales de la barbería.
-3. Crear exclusivamente una base nueva `lomas_eveneser_dev` con utf8mb4 y una cuenta nueva `lomas_app_dev` limitada a esa base. Generar su contraseña localmente. No conceder acceso global ni a barberia_db. Separar permisos de migración de los de ejecución cuando exista el esquema aprobado.
-4. Registrar los valores en un archivo local nuevo a partir de .env.example. El .env heredado sigue excluido y NO se carga con el diagnóstico. No habilitar ENABLE_LEGACY_API ni importar el respaldo anterior.
-5. Diseñar y revisar migraciones ganaderas antes de ejecutarlas; solo datos ficticios. El esquema en database/legacy es referencia histórica y no debe ejecutarse.
+El usuario confirmó mediante resultados de Terminal: MariaDB 10.4.28 en puerto 3306, base `lomas_eveneser_dev` con utf8mb4_unicode_ci, usuario `lomas_app_dev@localhost`, permisos SELECT/INSERT/UPDATE/DELETE y acceso TCP a 127.0.0.1. SHOW TABLES devolvió vacío. No se importó el respaldo anterior. La contraseña se restableció localmente; no se compartió con el agente.
 
-Todavía no hay operaciones de BD que probar: este arranque demuestra aislamiento, no conectividad. Los respaldos reales se almacenarán fuera del repositorio, con acceso restringido y una prueba de restauración en una base aparte; definir ubicación y periodicidad con el propietario.
+### Comprobar desde Node
+
+1. Abrir `lomas-backend/.env.lomas.local` en VS Code. Se preparó una plantilla local con permisos de archivo 600 y excluida de Git.
+2. Reemplazar únicamente `CAMBIAR_SOLO_LOCALMENTE` por la contraseña del usuario **lomas_app_dev**, conservando las comillas dobles. Guardar. No usar la contraseña de root ni el .env anterior. Si la contraseña contiene comillas dobles o barras inversas, revisar su representación en dotenv localmente antes de continuar; nunca compartirla en el chat.
+3. Desde la raíz del proyecto:
+
+```sh
+cd lomas-backend
+npm run db:check
+```
+
+El script lee exclusivamente `.env.lomas.local`, sin cargar el .env heredado ni combinar variables de entorno. Solo admite host 127.0.0.1, puerto 3306, base lomas_eveneser_dev y usuario lomas_app_dev. Ejecuta un SELECT para comprobar base, cuenta y versión. Cierra la conexión y no crea tablas, modifica datos ni envía correos. El resultado esperado identifica la base nueva y lomas_app_dev@localhost.
+
+En otra copia del proyecto, crear el archivo local a partir de `.env.lomas.example`. No subirlo a Git. `npm start` sigue en modo diagnóstico: no abre la BD ni habilita rutas heredadas. La conexión desde Node queda pendiente hasta que el usuario configure su contraseña local y ejecute db:check.
+
+Diseñar migraciones ganaderas antes de crear tablas; se aplicarán con una cuenta administrativa separada, no ampliando permisos del usuario de la aplicación. El esquema database/legacy es solo referencia. Respaldos reales fuera de GitHub y con restauración verificada en otra base.

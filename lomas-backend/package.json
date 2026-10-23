@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test",
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "db:check": "node scripts/check-database.js"
   },
   "keywords": [],
   "author": "",
