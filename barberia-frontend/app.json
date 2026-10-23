@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "barberia-frontend",
+    "slug": "barberia-frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
