@@ -1,9 +1,11 @@
 const express = require('express');
 const accessRequestRoutes = require('./routes/accessRequestRoutes');
+const loginRoutes = require('./routes/loginRoutes');
 
 const app = express();
 
 app.use(express.json({ limit: '100kb' }));
+app.use('/api/login', loginRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({

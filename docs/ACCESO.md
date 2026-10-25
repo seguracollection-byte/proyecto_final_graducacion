@@ -46,3 +46,28 @@ Pruebas automatizadas:
 
 El limitador guarda contadores en memoria y se reinicia con el servidor.
 Todavía no están implementados login, aprobación ni activación.
+
+## Login y controles de acceso
+
+Implementada POST /api/login con:
+- Validación de correo y contraseña.
+- Límite de diez intentos por IP en quince minutos.
+- Comparación de contraseñas mediante bcrypt.
+- Acceso únicamente para cuentas activas.
+- Respuesta genérica ante credenciales incorrectas.
+- Token JWT con vencimiento de una hora.
+
+El secreto JWT permanece únicamente en .env.lomas.local.
+
+requireAuth comprueba firma, vencimiento, emisor, destinatario,
+estado de la cuenta y versión de sesión.
+
+requireAdmin exige el rol administrador obtenido de la base.
+Estos controles todavía deben conectarse a las rutas protegidas.
+
+Se aprobaron seis pruebas automatizadas con datos ficticios.
+Se comprobaron manualmente respuestas 400 y 401 del login.
+Todavía no se probó un login exitoso con una cuenta persistida.
+
+Pendientes: aprovisionar administradores, aprobación de solicitudes,
+activación, recuperación y conexión con el frontend.
