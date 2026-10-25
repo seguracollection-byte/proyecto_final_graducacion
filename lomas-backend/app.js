@@ -3,6 +3,7 @@ const accessRequestRoutes = require('./routes/accessRequestRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const adminAccessRoutes = require('./routes/adminAccessRoutes');
+const activationRoutes = require('./routes/activationRoutes');
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json({ limit: '100kb' }));
 app.use('/api/login', loginRoutes);
 app.use('/api/sesion', sessionRoutes);
 app.use('/api/admin', adminAccessRoutes);
+app.use('/api/activar-cuenta', activationRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({

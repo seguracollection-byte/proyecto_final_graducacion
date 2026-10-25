@@ -137,3 +137,29 @@ Comprobaciones:
 - Ocho pruebas automatizadas aprobadas antes de la prueba real.
 
 Pendiente: verificar estas rutas con una cuenta común.
+
+## Aprobación y activación: implementación pendiente de prueba integral
+
+Se implementaron:
+- Aprobación transaccional por administrador.
+- Cuenta nueva con rol usuario y estado pendiente_activacion.
+- Tokens de activación aleatorios, almacenados únicamente como hash.
+- Vencimiento de activación de 24 horas.
+- Activación con contraseña bcrypt y consumo de enlaces.
+- Reenvío con invalidación de enlaces anteriores.
+- Respuestas diferenciadas para operación confirmada y correo
+  cuyo envío no pudo confirmarse.
+- Límite compartido de aprobación y reenvío por administrador.
+
+Se aprobaron trece pruebas automatizadas.
+Las rutas administrativas rechazaron peticiones sin token.
+La activación rechazó campos inválidos y un token inexistente.
+
+Pendientes:
+- Pantalla de activación.
+- Aprobación, correo y activación con una cuenta de prueba real.
+- Comprobar uso único, vencimiento y reenvío en MariaDB.
+- Probar rechazo de operaciones administrativas con usuario común.
+
+EMAIL_ENABLED permanece en false hasta la prueba de envío.
+No guardar tokens, contraseñas ni datos de cuentas en Git.
