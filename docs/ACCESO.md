@@ -118,3 +118,22 @@ Comprobaciones realizadas:
 
 La cuenta existe únicamente en la base local.
 No incluir sus datos ni su contraseña en migraciones o respaldos Git.
+
+## Listado administrativo y rechazo
+
+GET /api/admin/solicitudes permite consultar solicitudes pendientes.
+POST /api/admin/solicitudes/:id/rechazar rechaza una solicitud pendiente.
+
+Ambas rutas requieren sesión válida y rol administrador.
+El rechazo registra el ID del administrador autenticado y fecha UTC.
+No crea usuarios ni envía correos.
+
+Comprobaciones:
+- Sin token: HTTP 401.
+- Listado con administrador: HTTP 200.
+- Rechazo de solicitud ficticia pendiente: HTTP 200.
+- Segundo rechazo de la misma solicitud: HTTP 409.
+- Estado, revisor y fecha originales permanecieron sin cambios.
+- Ocho pruebas automatizadas aprobadas antes de la prueba real.
+
+Pendiente: verificar estas rutas con una cuenta común.

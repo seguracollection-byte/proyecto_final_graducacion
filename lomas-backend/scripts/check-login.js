@@ -71,6 +71,48 @@ async function main() {
   if (session.success !== true || !sameAccount) {
     process.exitCode = 1;
   }
+
+  if (session.success !== true || !sameAccount) {
+    process.exitCode = 1;
+    return;
+  }
+
+  const adminResponse = await fetch(
+    'http://127.0.0.1:3000/api/admin/solicitudes',
+    {
+      headers: {
+        Authorization: `Bearer ${result.token}`,
+      },
+      signal: AbortSignal.timeout(15000),
+    }
+  );
+
+  const adminResult = await adminResponse.json();
+
+  console.log('Estado del listado administrativo:', adminResponse.status);
+
+  if (
+    !adminResponse.ok ||
+    adminResult.success !== true ||
+    !Array.isArray(adminResult.solicitudes)
+  ) {
+    console.log('No se pudo consultar el listado administrativo.');
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(
+    'Solicitudes pendientes recibidas:',
+    adminResult.solicitudes.length
+  );
+
+  console.table(
+    adminResult.solicitudes.map((solicitud) => ({
+      id: solicitud.id,
+      estado: solicitud.estado,
+    }))
+  );
+
 }
 
 main().catch(() => {
