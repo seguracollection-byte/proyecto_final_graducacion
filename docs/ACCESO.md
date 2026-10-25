@@ -71,3 +71,50 @@ Todavía no se probó un login exitoso con una cuenta persistida.
 
 Pendientes: aprovisionar administradores, aprobación de solicitudes,
 activación, recuperación y conexión con el frontend.
+
+
+## Permisos y cuentas durante el desarrollo
+
+Durante desarrollo y pruebas se usarán únicamente cuentas
+controladas por Carlos Guillermo. Hernán y los demás usuarios
+se incorporarán cuando el backend, el frontend y las pruebas
+estén listos.
+
+Usuarios comunes y administradores podrán consultar, registrar
+y modificar los registros de los seis módulos ganaderos.
+Modificar registros no significa modificar la estructura SQL.
+
+Además, los administradores podrán:
+- Aprobar o rechazar solicitudes de acceso.
+- Desactivar cuentas, conservando el historial de la finca.
+- Revocar las sesiones de las cuentas desactivadas.
+- Iniciar un restablecimiento de contraseña por correo.
+
+Los administradores no podrán consultar las contraseñas.
+El usuario establecerá su nueva contraseña mediante un enlace
+de un solo uso y con vencimiento.
+
+Se impedirá desactivar al último administrador activo.
+El borrado definitivo de cuentas no forma parte de esta etapa.
+
+Estas reglas están acordadas; las operaciones administrativas
+todavía deben implementarse y probarse.
+
+## Primer administrador y sesión real
+
+Se creó el primer administrador de desarrollo mediante un comando
+local con contraseña oculta y hash bcrypt de costo 12.
+
+El comando no crea administradores adicionales si ya existe uno
+y no modifica cuentas con correos duplicados.
+
+Comprobaciones realizadas:
+- Login real: HTTP 200 y token recibido.
+- GET /api/sesion/me sin token: HTTP 401.
+- GET /api/sesion/me con token: HTTP 200.
+- La identidad coincide con la cuenta que inició sesión.
+- El rol actual proviene de la base de datos.
+- El script de comprobación no imprime ni guarda el token.
+
+La cuenta existe únicamente en la base local.
+No incluir sus datos ni su contraseña en migraciones o respaldos Git.
