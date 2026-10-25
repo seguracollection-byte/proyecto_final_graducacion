@@ -22,3 +22,27 @@ utilizada actualmente por el backend.
 
 No volver a ejecutar esta migración sobre las tablas creadas.
 Todavía no se implementaron los flujos de autenticación.
+
+## Solicitud pública de acceso
+
+Implementada POST /api/solicitudes-acceso.
+
+Orden de procesamiento:
+limitador por IP → validación → controlador → base de datos.
+
+Pruebas manuales realizadas:
+- Datos inválidos: respuesta 400.
+- Datos válidos: respuesta 202 y solicitud pendiente.
+- Correo duplicado: conserva una sola solicitud sin modificarla.
+- Rol y estado manipulados: no conceden permisos.
+- Solicitar acceso no crea usuarios ni tokens.
+- Superar cinco intentos en 15 minutos: respuesta 429.
+
+Pruebas automatizadas:
+- Restricciones de configuración de la base.
+- Respuesta de health y bloqueo de rutas heredadas.
+- Datos inválidos rechazados sin solicitar el pool.
+- Dos pruebas aprobadas.
+
+El limitador guarda contadores en memoria y se reinicia con el servidor.
+Todavía no están implementados login, aprobación ni activación.

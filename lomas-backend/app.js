@@ -1,11 +1,40 @@
 const express = require('express');
+const accessRequestRoutes = require('./routes/accessRequestRoutes');
+
 const app = express();
+
 app.use(express.json({ limit: '100kb' }));
-app.get('/health', (_req, res) => res.json({ status: 'ok', mode: 'diagnostic', database: 'disabled', email: 'disabled' }));
-// Las rutas heredadas permanecen cerradas hasta reparar autenticación y validación.
-app.use('/api', (_req, res) => res.status(503).json({ success: false, message: 'API heredada deshabilitada durante diagnóstico' }));
+
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    mode: 'development',
+    database: 'on-demand',
+    email: 'disabled',
+  });
+});
+
+// Ruta nueva de Lomas: solicitudes pendientes de aprobación.
+app.use('/api/solicitudes-acceso', accessRequestRoutes);
+
+// Las rutas heredadas de barbería permanecen bloqueadas.
+app.use('/api', (_req, res) => {
+  res.status(503).json({
+    success: false,
+    message: 'API heredada deshabilitada durante diagnóstico',
+  });
+});
+
 if (require.main === module) {
-  const server = app.listen(Number(process.env.PORT || 3000), '127.0.0.1', () => console.log('Diagnóstico disponible en loopback; sin BD ni correo'));
+  const server = app.listen(
+    Number(process.env.PORT || 3000),
+    '127.0.0.1',
+    () => {
+      console.log('Servidor de Lomas en http://127.0.0.1:3000');
+    }
+  );
+
   process.on('SIGTERM', () => server.close());
 }
+
 module.exports = app;
