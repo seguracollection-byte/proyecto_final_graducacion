@@ -1,35 +1,169 @@
-// App.js
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import {
+  DarkTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+} from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
-import LoginScreen from './src/screens/LoginScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
-import AdminDashboard from './src/screens/AdminDashboard';
-import BarberoDashboard from './src/screens/BarberoDashboard';
-import ClienteHome from './src/screens/ClienteHome';
-import AgendarCitaScreen from './src/screens/AgendarCitaScreen';
-// 🌟 CORREGIDO: Añadimos /src/ para que encuentre la ruta real del archivo
-import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen'; 
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import LomasLoginScreen from './src/screens/LomasLoginScreen';
+import LomasHomeScreen from './src/screens/LomasHomeScreen';
+import ActivateAccountScreen from './src/screens/ActivateAccountScreen';
+import { colors, spacing, radius } from './src/theme/theme';
+import { linking } from './src/navigation/linking';
 
 const Stack = createStackNavigator();
 
-export default function App() {
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: colors.primary,
+    background: colors.background,
+    card: colors.surface,
+    text: colors.text,
+    border: colors.border,
+  },
+};
+
+function AppNavigation() {
+  const {
+    user,
+    loading,
+    sessionError,
+    restoreSession,
+  } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+        />
+        <Text style={styles.message}>
+          Comprobando sesión…
+        </Text>
+      </View>
+    );
+  }
+
+  if (sessionError) {
+    return (
+      <View style={styles.center}>
+        <Text
+          style={styles.message}
+          accessibilityRole="alert"
+        >
+          {sessionError}
+        </Text>
+
+        <Pressable
+          onPress={restoreSession}
+          accessibilityRole="button"
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+        >
+          <Text style={styles.buttonText}>
+            Reintentar
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName="Login"
+    <NavigationContainer
+      theme={navigationTheme}
+      linking={user ? undefined : linking}
+    >
+      <Stack.Navigator
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
-        <Stack.Screen name="BarberoDashboard" component={BarberoDashboard} />
-        <Stack.Screen name="ClienteHome" component={ClienteHome} />
-        <Stack.Screen name="AgendarCita" component={AgendarCitaScreen} />
-        {/* Registro correcto de la pantalla de recuperación */}
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Contraseña' }} />
+        {user ? (
+          <Stack.Screen
+            name="Home"
+            component={LomasHomeScreen}
+          />
+        ) : (
+          <>
+            <Stack.Screen
+              name="Login"
+              component={LomasLoginScreen}
+            />
+            <Stack.Screen
+              name="ActivateAccount"
+              component={ActivateAccountScreen}
+            />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.screen}>
+        <StatusBar style="light" />
+
+        <AuthProvider>
+          <AppNavigation />
+        </AuthProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: colors.background,
+  },
+  center: {
+    flex: 1,
+    padding: spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  message: {
+    color: colors.text,
+    fontSize: 16,
+    textAlign: 'center',
+    marginVertical: spacing.md,
+    maxWidth: 480,
+  },
+  button: {
+    minHeight: 48,
+    padding: spacing.md,
+    borderRadius: radius.button,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonPressed: {
+    backgroundColor: colors.primaryPressed,
+  },
+  buttonText: {
+    color: colors.onPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+});

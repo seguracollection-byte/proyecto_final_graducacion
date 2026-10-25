@@ -163,3 +163,33 @@ Pendientes:
 
 EMAIL_ENABLED permanece en false hasta la prueba de envío.
 No guardar tokens, contraseñas ni datos de cuentas en Git.
+
+## Activación real y frontend inicial de Lomas
+
+Comprobaciones realizadas con cuentas controladas por el estudiante:
+- Aprobación administrativa y correo real de activación.
+- Enlace abierto en la pantalla web de Lomas.
+- Cuenta activada con contraseña elegida por el usuario.
+- Solicitud aprobada, cuenta activa y rol usuario confirmados en BD.
+- Token de activación marcado como consumido.
+- Login del usuario común y consulta de sesión: HTTP 200.
+- Listado administrativo con usuario común: HTTP 403.
+- Reutilización del enlace rechazada.
+- La contraseña original continuó funcionando tras ese rechazo.
+
+Frontend:
+- Login con logo y tema negro, dorado y blanco.
+- Inicio con los seis módulos identificados como pendientes.
+- Navegación anterior de barbería retirada de App.js.
+- Token en memoria para web y SecureStore configurado para móvil.
+- Lectura del token de activación desde el fragmento de la URL.
+
+Pendientes:
+- Corregir el desplazamiento de las pantallas.
+- Probar Android/iOS: la comprobación actual fue en navegador.
+- Recuperación de contraseña y pantallas de solicitudes/administración.
+- Pruebas reales de vencimiento y reenvío.
+- Retirar los archivos heredados que ya no se utilizan.
+
+Los enlaces, tokens, credenciales y datos reales de las cuentas
+de prueba no deben incluirse en Git.
