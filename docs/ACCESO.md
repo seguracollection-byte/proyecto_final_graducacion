@@ -239,3 +239,8 @@ Verificación automatizada: 15 pruebas del backend aprobadas.
 Pendientes: limpieza de barbería, ajustes visuales restantes
 y pruebas en dispositivos.
 Permanece un aviso de pointerEvents de una dependencia por revisar.
+
+
+## Limpieza del código heredado
+
+Se retiraron las seis pantallas antiguas de barbería, sus rutas y controladores de citas, servicios, barberos y autenticación, la configuración de base reemplazada y el esquema SQL antiguo. Las rutas inexistentes responden 404. La base local y los registros de Lomas no se modificaron.

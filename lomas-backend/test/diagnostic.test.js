@@ -48,7 +48,7 @@ test('estado, rutas heredadas y validación sin acceso a BD', async () => {
         method,
       });
 
-      assert.equal(response.status, 503);
+      assert.equal(response.status, 404);
       await response.text();
     }
 

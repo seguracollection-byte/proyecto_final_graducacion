@@ -41,11 +41,11 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// Las rutas heredadas de barbería permanecen bloqueadas.
+// Respuesta para rutas de API que no existen.
 app.use('/api', (_req, res) => {
-  res.status(503).json({
+  res.status(404).json({
     success: false,
-    message: 'API heredada deshabilitada durante diagnóstico',
+    message: 'Ruta no encontrada.',
   });
 });
 
