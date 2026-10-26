@@ -211,6 +211,13 @@ Comprobado en navegador con vista móvil:
 La corrección del scroll utiliza cardStyle del Stack Navigator.
 Se retiraron las mediciones temporales del inicio.
 
-Pendientes: aprobación y reenvío desde la interfaz, recuperación
-de contraseña, limpieza de barbería y pruebas en dispositivos.
+También se comprobó la aprobación desde la interfaz con una cuenta
+de prueba controlada: recepción del correo en Outlook, establecimiento
+de contraseña, activación e ingreso con rol de usuario.
+
+Se preparó buildRecoveryLink en config/accountLinks.js para la ruta
+/restablecer. La recuperación todavía requiere servicios, rutas y pantalla.
+
+Pendientes: reenvío desde la interfaz, recuperación de contraseña,
+limpieza de barbería y pruebas en dispositivos.
 Permanece un aviso de pointerEvents de una dependencia por revisar.

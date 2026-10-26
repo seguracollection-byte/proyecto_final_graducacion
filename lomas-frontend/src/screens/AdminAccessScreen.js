@@ -27,7 +27,7 @@ export default function AdminAccessScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selection, setSelection] = useState(null);
   const [busy, setBusy] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [notice, setNotice] = useState(null);
@@ -43,7 +43,7 @@ export default function AdminAccessScreen({ navigation }) {
         setLoading(true);
         setError('');
         setRequests([]);
-        setSelectedId(null);
+        setSelection(null);
         setNeedsRefresh(false);
 
         if (user?.rol !== 'administrador' || !token) {
@@ -119,30 +119,33 @@ export default function AdminAccessScreen({ navigation }) {
     setRefresh((value) => value + 1);
   }
 
-  function selectRejection(event, id) {
-    if (sending.current || needsRefresh) return;
+  function selectAction(event, id, action) {
+    if (sending.current || loading || needsRefresh) return;
 
     blurWebButton(event);
     setNotice(null);
-    setSelectedId(id);
+    setSelection({ id, action });
   }
 
-  function cancelRejection(event) {
+  function cancelAction(event) {
     if (sending.current) return;
 
     blurWebButton(event);
-    setSelectedId(null);
+    setSelection(null);
   }
 
-  async function confirmRejection(event, id) {
+  async function confirmAction(event, request) {
     if (
       sending.current ||
       loading ||
       needsRefresh ||
-      selectedId !== id
+      selection?.id !== request.id ||
+      !['aprobar', 'rechazar'].includes(selection?.action)
     ) {
       return;
     }
+
+    const action = selection.action;
 
     blurWebButton(event);
     sending.current = true;
@@ -151,52 +154,74 @@ export default function AdminAccessScreen({ navigation }) {
 
     try {
       const response = await api.post(
-        `/admin/solicitudes/${id}/rechazar`,
+        `/admin/solicitudes/${request.id}/${action}`,
         {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          timeout: 15000,
+          timeout: action === 'aprobar' ? 30000 : 15000,
         }
       );
 
-      if (response.data?.success !== true) {
+      const data = response.data;
+
+      if (
+        data?.success !== true ||
+        (action === 'aprobar' && data.aprobada !== true)
+      ) {
         throw new Error('Respuesta inesperada');
       }
 
       setRequests((current) =>
-        current.filter((request) => request.id !== id)
+        current.filter((item) => item.id !== request.id)
       );
 
-      setNotice({
-        success: true,
-        message: 'Solicitud rechazada correctamente.',
-      });
+      if (action === 'rechazar') {
+        setNotice({
+          type: 'success',
+          message: 'Solicitud rechazada correctamente.',
+        });
+      } else if (data.correoAceptado === true) {
+        setNotice({
+          type: 'success',
+          message:
+            'Solicitud aprobada. El servidor de correo aceptó el envío de activación. La persona debe establecer su contraseña para entrar.',
+        });
+      } else {
+        setNotice({
+          type: 'warning',
+          message:
+            'La solicitud quedó aprobada, pero no se confirmó el correo. La cuenta sigue pendiente de activación y necesita un reenvío. No vuelvas a aprobarla.',
+        });
+      }
     } catch (requestError) {
       const status = requestError.response?.status;
+      const data = requestError.response?.data;
 
       let message;
 
       if (status === 401) {
         message = 'Tu sesión venció. Volvé a iniciar sesión.';
       } else if (status === 403) {
-        message = 'No tenés permiso para rechazar solicitudes.';
+        message = 'No tenés permiso para realizar esta operación.';
       } else if (status === 409) {
         message =
           'La solicitud ya fue revisada o no está disponible. Actualizá el listado.';
+      } else if (status === 429) {
+        message =
+          'Demasiados intentos de envío. Esperá antes de reintentar y actualizá el listado.';
+      } else if (status === 503 && data?.message) {
+        message = `${data.message} Actualizá el listado antes de continuar.`;
       } else {
         message =
-          'No se pudo confirmar el resultado. Actualizá el listado antes de volver a intentar.';
+          'No se pudo confirmar el resultado. Actualizá el listado antes de volver a intentar. Si la aprobación se aplicó, no la repitas.';
       }
 
-      setNotice({ success: false, message });
-
-      // La operación pudo haberse aplicado aunque falle la respuesta.
-      // Exigir una consulta nueva antes de permitir otra decisión.
+      setNotice({ type: 'error', message });
       setNeedsRefresh(true);
     } finally {
-      setSelectedId(null);
+      setSelection(null);
       sending.current = false;
       setBusy(false);
     }
@@ -247,8 +272,9 @@ export default function AdminAccessScreen({ navigation }) {
             accessibilityState={{ disabled: loading || busy }}
             style={({ pressed }) => [
               styles.button,
+              styles.refreshButton,
               pressed && styles.buttonPressed,
-              (loading || busy) && styles.buttonDisabled,
+              (loading || busy) && styles.faded,
             ]}
           >
             <Text style={styles.buttonText}>
@@ -261,7 +287,11 @@ export default function AdminAccessScreen({ navigation }) {
               accessibilityRole="alert"
               style={[
                 styles.notice,
-                notice.success ? styles.success : styles.error,
+                notice.type === 'success'
+                  ? styles.success
+                  : notice.type === 'warning'
+                    ? styles.warning
+                    : styles.error,
               ]}
             >
               {notice.message}
@@ -284,87 +314,139 @@ export default function AdminAccessScreen({ navigation }) {
               No hay solicitudes pendientes.
             </Text>
           ) : (
-            requests.map((request) => (
-              <View key={request.id} style={styles.card}>
-                <Text style={styles.name}>
-                  {request.nombre}
-                </Text>
+            requests.map((request) => {
+              const selected = selection?.id === request.id;
+              const approving = selection?.action === 'aprobar';
 
-                <Text style={styles.description}>
-                  {request.email}
-                </Text>
+              return (
+                <View key={request.id} style={styles.card}>
+                  <Text style={styles.name}>
+                    {request.nombre}
+                  </Text>
 
-                <Text style={styles.pending}>
-                  Pendiente de aprobación
-                </Text>
+                  <Text style={styles.description}>
+                    {request.email}
+                  </Text>
 
-                {selectedId === request.id ? (
-                  <View style={styles.confirmation}>
-                    <Text style={styles.description}>
-                      ¿Rechazar esta solicitud? No se creará
-                      una cuenta ni se enviará un correo.
-                    </Text>
+                  <Text style={styles.pending}>
+                    Pendiente de aprobación
+                  </Text>
 
-                    <Pressable
-                      onPress={(event) =>
-                        confirmRejection(event, request.id)
-                      }
-                      disabled={actionsDisabled}
-                      accessibilityRole="button"
-                      accessibilityState={{
-                        disabled: actionsDisabled,
-                      }}
-                      style={[
-                        styles.rejectButton,
-                        actionsDisabled && styles.faded,
-                      ]}
-                    >
-                      {busy ? (
-                        <ActivityIndicator color={colors.error} />
-                      ) : (
-                        <Text style={styles.rejectText}>
-                          Confirmar rechazo
-                        </Text>
-                      )}
-                    </Pressable>
-
-                    <Pressable
-                      onPress={cancelRejection}
-                      disabled={busy}
-                      accessibilityRole="button"
-                      accessibilityState={{ disabled: busy }}
-                      style={styles.cancelButton}
-                    >
-                      <Text style={styles.cancelText}>
-                        Cancelar
+                  {selected ? (
+                    <View style={styles.confirmation}>
+                      <Text style={styles.description}>
+                        {approving
+                          ? '¿Aprobar esta solicitud como usuario común y enviarle un correo para activar su cuenta?'
+                          : '¿Rechazar esta solicitud? No se creará una cuenta ni se enviará un correo.'}
                       </Text>
-                    </Pressable>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={(event) =>
-                      selectRejection(event, request.id)
-                    }
-                    disabled={actionsDisabled}
-                    accessibilityRole="button"
-                    accessibilityLabel={
-                      `Rechazar solicitud de ${request.nombre}`
-                    }
-                    accessibilityState={{
-                      disabled: actionsDisabled,
-                    }}
-                    style={[
-                      styles.rejectButton,
-                      actionsDisabled && styles.faded,
-                    ]}
-                  >
-                    <Text style={styles.rejectText}>
-                      Rechazar
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
-            ))
+
+                      <Text style={styles.description}>
+                        {request.nombre}
+                        {'\n'}
+                        {request.email}
+                      </Text>
+
+                      <Pressable
+                        onPress={(event) =>
+                          confirmAction(event, request)
+                        }
+                        disabled={actionsDisabled}
+                        accessibilityRole="button"
+                        accessibilityState={{
+                          disabled: actionsDisabled,
+                        }}
+                        style={[
+                          approving
+                            ? styles.button
+                            : styles.rejectButton,
+                          actionsDisabled && styles.faded,
+                        ]}
+                      >
+                        {busy ? (
+                          <ActivityIndicator
+                            color={
+                              approving
+                                ? colors.onPrimary
+                                : colors.error
+                            }
+                          />
+                        ) : (
+                          <Text
+                            style={
+                              approving
+                                ? styles.buttonText
+                                : styles.rejectText
+                            }
+                          >
+                            {approving
+                              ? 'Confirmar aprobación'
+                              : 'Confirmar rechazo'}
+                          </Text>
+                        )}
+                      </Pressable>
+
+                      <Pressable
+                        onPress={cancelAction}
+                        disabled={busy}
+                        accessibilityRole="button"
+                        accessibilityState={{ disabled: busy }}
+                        style={styles.cancelButton}
+                      >
+                        <Text style={styles.cancelText}>
+                          Cancelar
+                        </Text>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    <View style={styles.actions}>
+                      <Pressable
+                        onPress={(event) =>
+                          selectAction(event, request.id, 'aprobar')
+                        }
+                        disabled={actionsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          `Aprobar solicitud de ${request.nombre}`
+                        }
+                        accessibilityState={{
+                          disabled: actionsDisabled,
+                        }}
+                        style={[
+                          styles.button,
+                          actionsDisabled && styles.faded,
+                        ]}
+                      >
+                        <Text style={styles.buttonText}>
+                          Aprobar
+                        </Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={(event) =>
+                          selectAction(event, request.id, 'rechazar')
+                        }
+                        disabled={actionsDisabled}
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          `Rechazar solicitud de ${request.nombre}`
+                        }
+                        accessibilityState={{
+                          disabled: actionsDisabled,
+                        }}
+                        style={[
+                          styles.rejectButton,
+                          actionsDisabled && styles.faded,
+                        ]}
+                      >
+                        <Text style={styles.rejectText}>
+                          Rechazar
+                        </Text>
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+              );
+            })
           )}
         </View>
       </ScrollView>
@@ -476,6 +558,12 @@ const styles = StyleSheet.create({
   success: {
     color: colors.success,
   },
+  warning: {
+    color: colors.primary,
+  },
+  actions: {
+    gap: spacing.md,
+  },
   button: {
     minHeight: 48,
     padding: spacing.md,
@@ -483,13 +571,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.primary,
+  },
+  refreshButton: {
     marginBottom: spacing.lg,
   },
   buttonPressed: {
     backgroundColor: colors.primaryPressed,
-  },
-  buttonDisabled: {
-    backgroundColor: colors.disabled,
   },
   buttonText: {
     color: colors.onPrimary,
