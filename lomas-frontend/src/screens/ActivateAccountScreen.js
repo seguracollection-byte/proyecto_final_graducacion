@@ -7,12 +7,12 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     View,
 } from 'react-native';
 
 import api from '../services/api';
 import { colors, spacing, radius } from '../theme/theme';
+import PasswordInput from '../components/PasswordInput';
 
 export default function ActivateAccountScreen({
     route,
@@ -139,11 +139,10 @@ export default function ActivateAccountScreen({
                             </Text>
 
                             <Text style={styles.label}>Contraseña nueva</Text>
-                            <TextInput
+                            <PasswordInput
                                 style={styles.input}
                                 value={password}
                                 onChangeText={setPassword}
-                                secureTextEntry
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 editable={!loading}
@@ -151,11 +150,10 @@ export default function ActivateAccountScreen({
                             />
 
                             <Text style={styles.label}>Repetir contraseña</Text>
-                            <TextInput
+                            <PasswordInput
                                 style={styles.input}
                                 value={confirmation}
                                 onChangeText={setConfirmation}
-                                secureTextEntry
                                 autoCapitalize="none"
                                 autoCorrect={false}
                                 editable={!loading}

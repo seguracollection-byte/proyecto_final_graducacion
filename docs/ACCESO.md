@@ -215,9 +215,27 @@ También se comprobó la aprobación desde la interfaz con una cuenta
 de prueba controlada: recepción del correo en Outlook, establecimiento
 de contraseña, activación e ingreso con rol de usuario.
 
-Se preparó buildRecoveryLink en config/accountLinks.js para la ruta
-/restablecer. La recuperación todavía requiere servicios, rutas y pantalla.
+## Recuperación de contraseña y reenvío de activación
 
-Pendientes: reenvío desde la interfaz, recuperación de contraseña,
-limpieza de barbería y pruebas en dispositivos.
+Comprobado desde la interfaz con cuentas de prueba controladas:
+
+- Solicitud y recepción del correo real de recuperación.
+- Cambio de contraseña mediante enlace de un solo uso.
+- Ingreso correcto con la contraseña nueva.
+- Rechazo de la contraseña anterior.
+- Rechazo del enlace de recuperación ya utilizado.
+- Listado administrativo de cuentas pendientes de activación.
+- Reenvío del correo de activación.
+- Invalidación del enlace anterior tras el reenvío.
+- Activación e ingreso mediante el enlace nuevo.
+- La cuenta activada desaparece del listado al actualizar.
+
+Los campos de contraseña de Login, Activación y Restablecimiento
+utilizan PasswordInput con íconos para mostrar y ocultar.
+La contraseña vuelve a ocultarse automáticamente a los 3 segundos.
+
+Verificación automatizada: 15 pruebas del backend aprobadas.
+
+Pendientes: limpieza de barbería, ajustes visuales restantes
+y pruebas en dispositivos.
 Permanece un aviso de pointerEvents de una dependencia por revisar.

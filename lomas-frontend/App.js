@@ -25,6 +25,9 @@ import LomasHomeScreen from './src/screens/LomasHomeScreen';
 import ActivateAccountScreen from './src/screens/ActivateAccountScreen';
 import RequestAccessScreen from './src/screens/RequestAccessScreen';
 import AdminAccessScreen from './src/screens/AdminAccessScreen';
+import PendingActivationsScreen from './src/screens/PendingActivationsScreen';
+import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 
 import { colors, spacing, radius } from './src/theme/theme';
 import { linking } from './src/navigation/linking';
@@ -114,10 +117,16 @@ function AppNavigation() {
             />
 
             {user.rol === 'administrador' ? (
-              <Stack.Screen
-                name="AdminAccess"
-                component={AdminAccessScreen}
-              />
+              <>
+                <Stack.Screen
+                  name="AdminAccess"
+                  component={AdminAccessScreen}
+                />
+                <Stack.Screen
+                  name="PendingActivations"
+                  component={PendingActivationsScreen}
+                />
+              </>
             ) : null}
           </>
         ) : (
@@ -135,6 +144,16 @@ function AppNavigation() {
             <Stack.Screen
               name="RequestAccess"
               component={RequestAccessScreen}
+            />
+
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+            />
+
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
             />
           </>
         )}

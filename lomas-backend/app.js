@@ -1,13 +1,15 @@
 const express = require('express');
+const cors = require('cors');
+
 const accessRequestRoutes = require('./routes/accessRequestRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const adminAccessRoutes = require('./routes/adminAccessRoutes');
 const activationRoutes = require('./routes/activationRoutes');
-
+const recoveryRoutes = require('./routes/recoveryRoutes');
+const resetPasswordRoutes = require('./routes/resetPasswordRoutes');
 
 const app = express();
-const cors = require('cors');
 
 app.use(cors({
   origin: [
@@ -21,11 +23,14 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: '100kb' }));
+
 app.use('/api/login', loginRoutes);
 app.use('/api/sesion', sessionRoutes);
 app.use('/api/admin', adminAccessRoutes);
 app.use('/api/activar-cuenta', activationRoutes);
-app.use(cors());
+app.use('/api/recuperar-password', recoveryRoutes);
+app.use('/api/restablecer-password', resetPasswordRoutes);
+app.use('/api/solicitudes-acceso', accessRequestRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({
@@ -35,9 +40,6 @@ app.get('/health', (_req, res) => {
     email: 'disabled',
   });
 });
-
-// Ruta nueva de Lomas: solicitudes pendientes de aprobación.
-app.use('/api/solicitudes-acceso', accessRequestRoutes);
 
 // Las rutas heredadas de barbería permanecen bloqueadas.
 app.use('/api', (_req, res) => {

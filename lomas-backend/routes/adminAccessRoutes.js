@@ -16,6 +16,10 @@ const {
   resendActivation,
 } = require('../controllers/resendActivationController');
 
+const {
+  listPendingActivations,
+} = require('../controllers/pendingActivationController');
+
 const router = express.Router();
 
 router.use(requireAuth, requireAdmin);
@@ -34,6 +38,7 @@ const activationEmailLimiter = rateLimit({
 });
 
 router.get('/solicitudes', listPendingRequests);
+router.get('/activaciones-pendientes', listPendingActivations);
 
 router.post(
   '/solicitudes/:id/rechazar',

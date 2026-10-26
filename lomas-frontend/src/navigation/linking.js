@@ -8,7 +8,15 @@ const config = {
   screens: {
     Login: '',
     ActivateAccount: 'activar',
+    RequestAccess: 'crear-cuenta',
+    ForgotPassword: 'recuperar',
+    ResetPassword: 'restablecer',
   },
+};
+
+const tokenScreens = {
+  activar: 'ActivateAccount',
+  restablecer: 'ResetPassword',
 };
 
 function isValidToken(token) {
@@ -23,6 +31,7 @@ export const linking = {
     'http://localhost:8082',
     'http://127.0.0.1:8082',
   ],
+
   config,
 
   async getInitialURL() {
@@ -43,7 +52,9 @@ export const linking = {
 
     const pathname = (
       hashIndex >= 0 ? path.slice(0, hashIndex) : path
-    ).split('?')[0];
+    )
+      .split('?')[0]
+      .replace(/^\/+|\/+$/g, '');
 
     let fragment = hashIndex >= 0
       ? path.slice(hashIndex + 1)
@@ -53,13 +64,20 @@ export const linking = {
       fragment = globalThis.location?.hash?.slice(1) || fragment;
     }
 
-    if (pathname.replace(/^\/+|\/+$/g, '') === 'activar') {
+    const screenName = Object.prototype.hasOwnProperty.call(
+      tokenScreens,
+      pathname
+    )
+      ? tokenScreens[pathname]
+      : undefined;
+
+    if (screenName) {
       const token = new URLSearchParams(fragment).get('token');
 
       return {
         routes: [
           {
-            name: 'ActivateAccount',
+            name: screenName,
             params: {
               token: isValidToken(token) ? token : undefined,
             },
@@ -72,14 +90,23 @@ export const linking = {
   },
 
   getPathFromState(state, options) {
-    const route = state.routes[state.index ?? state.routes.length - 1];
+    const route = state.routes[
+      state.index ?? state.routes.length - 1
+    ];
 
-    if (route.name === 'ActivateAccount') {
+    const pathname =
+      route.name === 'ActivateAccount'
+        ? '/activar'
+        : route.name === 'ResetPassword'
+          ? '/restablecer'
+          : undefined;
+
+    if (pathname) {
       const token = route.params?.token;
 
       return isValidToken(token)
-        ? `/activar#token=${token}`
-        : '/activar';
+        ? `${pathname}#token=${token}`
+        : pathname;
     }
 
     return getPathFromState(state, options);

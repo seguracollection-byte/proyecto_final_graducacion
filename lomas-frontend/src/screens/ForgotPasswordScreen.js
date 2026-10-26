@@ -1,80 +1,290 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+
 import api from '../services/api';
+import { colors, spacing, radius } from '../theme/theme';
 
 export default function ForgotPasswordScreen({ navigation }) {
-    const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [completed, setCompleted] = useState(false);
+  const sending = useRef(false);
 
-    const handleRecuperar = async () => {
-        if (!email) {
-            Alert.alert('Campo requerido', 'Por favor ingresa tu correo electrónico.');
-            return;
-        }
+  async function handleSubmit() {
+    if (sending.current) return;
 
-        setLoading(true);
-        try {
-            // Llama al nuevo endpoint del backend
-            const response = await api.post('/auth/recuperar', { email });
+    setError('');
 
-            if (response.data.success) {
-                Alert.alert(
-                    '¡Correo Enviado!',
-                    'Revisa tu bandeja de entrada. Te hemos enviado una contraseña temporal válida para cualquiera de tus perfiles.',
-                    [{ text: 'Ir al Login', onPress: () => navigation.navigate('Login') }]
-                );
-            }
-        } catch (error) {
-            console.log('Error de recuperación:', error.response?.data);
-            const errorMsg = error.response?.data?.message || 'No se pudo procesar la solicitud de recuperación.';
-            Alert.alert('Error', errorMsg);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const normalizedEmail = email.trim().toLowerCase();
 
-    return (
-        <ScrollView style={styles.outerContainer} contentContainerStyle={styles.scrollContent}>
-            <Text style={styles.logoTitle}>Pierce Barber Shop</Text>
-            <Text style={styles.title}>Recuperar Contraseña</Text>
-            <Text style={styles.subtitle}>
-                Ingresa el correo electrónico real con el que registraste tu cuenta. Te enviaremos una clave de acceso de inmediato.
+    if (
+      normalizedEmail.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+      setError('Ingresá un correo válido.');
+      return;
+    }
+
+    sending.current = true;
+    setLoading(true);
+
+    try {
+      const response = await api.post(
+        '/recuperar-password',
+        { email: normalizedEmail },
+        { timeout: 30000 }
+      );
+
+      if (
+        response.status !== 202 ||
+        response.data?.success !== true
+      ) {
+        throw new Error('Respuesta inesperada');
+      }
+
+      setEmail('');
+      setCompleted(true);
+    } catch (requestError) {
+      const status = requestError.response?.status;
+
+      if (status === 400) {
+        setError(
+          requestError.response?.data?.errors?.[0]?.mensaje ||
+          'Ingresá un correo válido.'
+        );
+      } else if (status === 429) {
+        setError(
+          'Demasiadas solicitudes. Esperá antes de volver a intentarlo.'
+        );
+      } else if (status === 503) {
+        setError(
+          'La recuperación no está disponible en este momento. Intentá más tarde.'
+        );
+      } else {
+        setError(
+          'No se pudo confirmar la solicitud. Revisá tu correo antes de intentarlo nuevamente.'
+        );
+      }
+    } finally {
+      sending.current = false;
+      setLoading(false);
+    }
+  }
+
+  function handleBack(event) {
+    if (Platform.OS === 'web') {
+      event?.currentTarget?.blur?.();
+    }
+
+    navigation.navigate('Login');
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.card}>
+          <Text style={styles.brand}>LOMAS EVENESER</Text>
+
+          <Text style={styles.title}>
+            {completed ? 'Revisá tu correo' : 'Recuperar contraseña'}
+          </Text>
+
+          {completed ? (
+            <Text style={styles.description}>
+              Si el correo corresponde a una cuenta activa,
+              recibirás un enlace para restablecer tu contraseña.
+              Revisá también la carpeta de correo no deseado.
+              {'\n\n'}
+              El enlace vence en 15 minutos y solo puede
+              utilizarse una vez.
             </Text>
+          ) : (
+            <>
+              <Text style={styles.description}>
+                Ingresá el correo de tu cuenta para solicitar
+                un enlace de recuperación.
+              </Text>
 
-            <TextInput
+              <Text style={styles.label}>Correo electrónico</Text>
+
+              <TextInput
                 style={styles.input}
-                placeholder="Correo Electrónico"
-                placeholderTextColor="#666"
                 value={email}
                 onChangeText={setEmail}
+                maxLength={254}
                 keyboardType="email-address"
                 autoCapitalize="none"
-            />
+                autoCorrect={false}
+                autoComplete="email"
+                editable={!loading}
+                accessibilityLabel="Correo electrónico"
+                returnKeyType="send"
+                onSubmitEditing={handleSubmit}
+              />
 
-            <TouchableOpacity style={styles.button} onPress={handleRecuperar} disabled={loading}>
+              {error ? (
+                <Text
+                  style={styles.error}
+                  accessibilityRole="alert"
+                >
+                  {error}
+                </Text>
+              ) : null}
+
+              <Pressable
+                onPress={handleSubmit}
+                disabled={loading}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: loading }}
+                style={({ pressed }) => [
+                  styles.button,
+                  pressed && styles.buttonPressed,
+                  loading && styles.buttonDisabled,
+                ]}
+              >
                 {loading ? (
-                    <ActivityIndicator color="#141419" />
+                  <ActivityIndicator color={colors.onPrimary} />
                 ) : (
-                    <Text style={styles.buttonText}>📧 Enviar Contraseña Temporal</Text>
+                  <Text style={styles.buttonText}>
+                    Enviar enlace
+                  </Text>
                 )}
-            </TouchableOpacity>
+              </Pressable>
+            </>
+          )}
 
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.backButtonText}>Regresar a Iniciar Sesión</Text>
-            </TouchableOpacity>
-        </ScrollView>
-    );
+          <Pressable
+            onPress={handleBack}
+            disabled={loading}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading }}
+            style={styles.backButton}
+          >
+            <Text style={styles.backText}>
+              Volver a iniciar sesión
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
 
 const styles = StyleSheet.create({
-    outerContainer: { flex: 1, backgroundColor: '#141419', height: '100vh' },
-    scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 25 },
-    logoTitle: { color: '#d4af37', fontSize: 26, fontWeight: 'bold', textAlign: 'center', letterSpacing: 1 },
-    title: { color: '#ffffff', fontSize: 18, fontWeight: '500', textAlign: 'center', marginVertical: 10 },
-    subtitle: { color: '#a0a0a9', fontSize: 13, textAlign: 'center', marginBottom: 30, lineHeight: 18 },
-    input: { backgroundColor: '#1e1e24', color: '#fff', padding: 15, borderRadius: 8, marginBottom: 20, fontSize: 16, borderWidth: 1, borderColor: '#2c2c35' },
-    button: { backgroundColor: '#d4af37', padding: 15, borderRadius: 8, alignItems: 'center', marginTop: 5 },
-    buttonText: { color: '#141419', fontSize: 15, fontWeight: 'bold' },
-    backButton: { marginTop: 25, padding: 10 },
-    backButtonText: { color: '#aaa', textAlign: 'center', fontSize: 14, textDecorationLine: 'underline' }
+  screen: {
+    flex: 1,
+    minHeight: 0,
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+    minHeight: 0,
+  },
+  content: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 480,
+    padding: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  brand: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  description: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: spacing.lg,
+  },
+  label: {
+    color: colors.text,
+    fontSize: 16,
+    marginBottom: spacing.sm,
+  },
+  input: {
+    color: colors.text,
+    backgroundColor: colors.background,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.input,
+    minHeight: 48,
+    padding: spacing.md,
+    fontSize: 16,
+    marginBottom: spacing.md,
+  },
+  error: {
+    color: colors.error,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: spacing.md,
+  },
+  button: {
+    minHeight: 48,
+    padding: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.button,
+    backgroundColor: colors.primary,
+  },
+  buttonPressed: {
+    backgroundColor: colors.primaryPressed,
+  },
+  buttonDisabled: {
+    backgroundColor: colors.disabled,
+  },
+  buttonText: {
+    color: colors.onPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  backButton: {
+    minHeight: 48,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  backText: {
+    color: colors.primary,
+    fontSize: 16,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
 });
