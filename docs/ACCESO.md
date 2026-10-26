@@ -193,3 +193,24 @@ Pendientes:
 
 Los enlaces, tokens, credenciales y datos reales de las cuentas
 de prueba no deben incluirse en Git.
+
+## Registro y administración desde la interfaz
+
+Comprobado en navegador con vista móvil:
+- Scroll del inicio y acceso al botón Cerrar sesión.
+- Cierre de sesión y regreso al login.
+- Navegación entre Login y Crear cuenta.
+- Validación de nombre y correo en el formulario.
+- Solicitud enviada desde la interfaz y guardada como pendiente,
+  sin crear una cuenta.
+- Listado administrativo con datos reales del backend.
+- Flecha para regresar a la pantalla anterior.
+- Cancelación de rechazo sin retirar la solicitud.
+- Rechazo confirmado desde la interfaz y verificado en MariaDB.
+
+La corrección del scroll utiliza cardStyle del Stack Navigator.
+Se retiraron las mediciones temporales del inicio.
+
+Pendientes: aprobación y reenvío desde la interfaz, recuperación
+de contraseña, limpieza de barbería y pruebas en dispositivos.
+Permanece un aviso de pointerEvents de una dependencia por revisar.

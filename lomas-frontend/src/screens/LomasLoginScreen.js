@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, radius } from '../theme/theme';
 
-export default function LomasLoginScreen() {
+export default function LomasLoginScreen({ navigation }) {
   const { signIn } = useAuth();
 
   const [email, setEmail] = useState('');
@@ -59,16 +59,24 @@ export default function LomasLoginScreen() {
     }
   }
 
+  function handleCreateAccount(event) {
+    if (Platform.OS === 'web') {
+      event.currentTarget?.blur?.();
+    }
+
+    navigation.navigate('RequestAccess');
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-  style={styles.scroll}
-  contentContainerStyle={styles.content}
-  keyboardShouldPersistTaps="handled"
->
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.card}>
           <Image
             source={require('../../assets/lomas-logo.png')}
@@ -77,7 +85,6 @@ export default function LomasLoginScreen() {
             accessibilityLabel="Logo de Lomas Eveneser"
           />
 
-          <Text style={styles.brand}>LOMAS EVENESER</Text>
           <Text style={styles.title}>Iniciar sesión</Text>
 
           <Text style={styles.description}>
@@ -135,6 +142,18 @@ export default function LomasLoginScreen() {
               <Text style={styles.buttonText}>Ingresar</Text>
             )}
           </Pressable>
+
+          <Pressable
+            onPress={handleCreateAccount}
+            disabled={loading}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading }}
+            style={styles.createAccountButton}
+          >
+            <Text style={styles.createAccountText}>
+              Crear cuenta
+            </Text>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -145,6 +164,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
     flexGrow: 1,
@@ -162,16 +184,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   logo: {
-  width: 160,
-  height: 160,
-  alignSelf: 'center',
-  marginBottom: spacing.md,
-},
-  brand: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'center',
+    width: 160,
+    height: 160,
+    alignSelf: 'center',
     marginBottom: spacing.md,
   },
   title: {
@@ -228,7 +243,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  scroll: {
-  flex: 1,
-},
+  createAccountButton: {
+    minHeight: 48,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.sm,
+  },
+  createAccountText: {
+    color: colors.primary,
+    fontSize: 16,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
 });

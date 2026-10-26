@@ -1,9 +1,11 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {
@@ -21,6 +23,9 @@ import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LomasLoginScreen from './src/screens/LomasLoginScreen';
 import LomasHomeScreen from './src/screens/LomasHomeScreen';
 import ActivateAccountScreen from './src/screens/ActivateAccountScreen';
+import RequestAccessScreen from './src/screens/RequestAccessScreen';
+import AdminAccessScreen from './src/screens/AdminAccessScreen';
+
 import { colors, spacing, radius } from './src/theme/theme';
 import { linking } from './src/navigation/linking';
 
@@ -92,22 +97,44 @@ function AppNavigation() {
       linking={user ? undefined : linking}
     >
       <Stack.Navigator
-        screenOptions={{ headerShown: false }}
+        screenOptions={{
+          headerShown: false,
+          cardStyle: {
+            flex: 1,
+            minHeight: 0,
+            backgroundColor: colors.background,
+          },
+        }}
       >
         {user ? (
-          <Stack.Screen
-            name="Home"
-            component={LomasHomeScreen}
-          />
+          <>
+            <Stack.Screen
+              name="Home"
+              component={LomasHomeScreen}
+            />
+
+            {user.rol === 'administrador' ? (
+              <Stack.Screen
+                name="AdminAccess"
+                component={AdminAccessScreen}
+              />
+            ) : null}
+          </>
         ) : (
           <>
             <Stack.Screen
               name="Login"
               component={LomasLoginScreen}
             />
+
             <Stack.Screen
               name="ActivateAccount"
               component={ActivateAccountScreen}
+            />
+
+            <Stack.Screen
+              name="RequestAccess"
+              component={RequestAccessScreen}
             />
           </>
         )}
@@ -117,16 +144,30 @@ function AppNavigation() {
 }
 
 export default function App() {
-  return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.screen}>
-        <StatusBar style="light" />
+  const { height } = useWindowDimensions();
 
-        <AuthProvider>
-          <AppNavigation />
-        </AuthProvider>
-      </SafeAreaView>
-    </SafeAreaProvider>
+  const viewportStyle =
+    Platform.OS === 'web'
+      ? {
+          height,
+          width: '100%',
+          flexShrink: 0,
+          overflow: 'hidden',
+        }
+      : styles.screen;
+
+  return (
+    <View style={viewportStyle}>
+      <SafeAreaProvider style={styles.screen}>
+        <SafeAreaView style={styles.screen}>
+          <StatusBar style="light" />
+
+          <AuthProvider>
+            <AppNavigation />
+          </AuthProvider>
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </View>
   );
 }
 
