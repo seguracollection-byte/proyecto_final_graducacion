@@ -509,6 +509,8 @@ const styles = StyleSheet.create({
         lineHeight: 36,
     },
     brand: {
+        marginRight: 56,
+    textAlign: 'center',
         flex: 1,
         color: colors.primary,
         fontSize: 16,
@@ -528,12 +530,14 @@ const styles = StyleSheet.create({
         maxWidth: 900,
     },
     title: {
+    textAlign: 'center',
         color: colors.text,
         fontSize: 28,
         fontWeight: '700',
         marginBottom: spacing.md,
     },
     description: {
+    textAlign: 'center',
         color: colors.textSecondary,
         fontSize: 16,
         lineHeight: 24,
@@ -548,12 +552,14 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     name: {
+    textAlign: 'center',
         color: colors.text,
         fontSize: 19,
         fontWeight: '700',
         marginBottom: spacing.sm,
     },
     pending: {
+    textAlign: 'center',
         color: colors.primary,
         fontSize: 14,
         marginBottom: spacing.md,
@@ -564,11 +570,13 @@ const styles = StyleSheet.create({
         gap: spacing.md,
     },
     notice: {
+    textAlign: 'center',
         fontSize: 16,
         lineHeight: 24,
         marginBottom: spacing.md,
     },
     error: {
+    textAlign: 'center',
         color: colors.error,
         fontSize: 16,
         lineHeight: 24,
@@ -597,6 +605,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.primaryPressed,
     },
     buttonText: {
+    textAlign: 'center',
         color: colors.onPrimary,
         fontSize: 16,
         fontWeight: '700',
@@ -616,6 +625,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     rejectText: {
+    textAlign: 'center',
         color: colors.error,
         fontSize: 16,
         fontWeight: '700',
@@ -628,6 +638,7 @@ const styles = StyleSheet.create({
         marginTop: spacing.sm,
     },
     cancelText: {
+    textAlign: 'center',
         color: colors.primary,
         fontSize: 16,
     },

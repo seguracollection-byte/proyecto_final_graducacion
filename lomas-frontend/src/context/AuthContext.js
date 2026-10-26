@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 
 import api from '../services/api';
+import { rememberEmail } from '../services/rememberedEmails';
 import {
   saveSessionToken,
   readSessionToken,
@@ -84,7 +85,7 @@ export function AuthProvider({ children }) {
     restoreSession();
   }, [restoreSession]);
 
-  async function signIn(email, password) {
+  async function signIn(email, password, options = {}) {
     const response = await api.post(
       '/login',
       { email: email.trim(), password },
@@ -105,6 +106,15 @@ export function AuthProvider({ children }) {
     const currentUser = await fetchCurrentUser(receivedToken);
 
     await saveSessionToken(receivedToken);
+
+    // Guardar solo el correo de una cuenta verificada, nunca la contraseña.
+    if (options.rememberEmail === true) {
+      try {
+        await rememberEmail(currentUser.email || email);
+      } catch {
+        console.warn('No se pudo recordar el correo en este dispositivo.');
+      }
+    }
 
     setSessionError('');
     setToken(receivedToken);

@@ -50,6 +50,11 @@ export default function LomasHomeScreen({ navigation }) {
     navigation.navigate('AdminAccess');
   }
 
+  // La pantalla puede seguir montada durante la transición al login.
+  if (!user) {
+    return <View style={styles.screen} />;
+  }
+
   return (
     <ScrollView
       testID="home-scroll"
@@ -151,18 +156,21 @@ const styles = StyleSheet.create({
     maxWidth: 900,
   },
   brand: {
+    textAlign: 'center',
     color: colors.primary,
     fontSize: 16,
     fontWeight: '700',
     marginBottom: spacing.md,
   },
   title: {
+    textAlign: 'center',
     color: colors.text,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: spacing.sm,
   },
   sectionTitle: {
+    textAlign: 'center',
     color: colors.text,
     fontSize: 22,
     fontWeight: '700',
@@ -177,22 +185,26 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   cardTitle: {
+    textAlign: 'center',
     color: colors.text,
     fontSize: 19,
     fontWeight: '700',
     marginBottom: spacing.sm,
   },
   description: {
+    textAlign: 'center',
     color: colors.textSecondary,
     fontSize: 16,
     lineHeight: 24,
     marginBottom: spacing.sm,
   },
   pending: {
+    textAlign: 'center',
     color: colors.primary,
     fontSize: 14,
   },
   error: {
+    textAlign: 'center',
     color: colors.error,
     marginVertical: spacing.md,
   },
@@ -212,6 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.disabled,
   },
   buttonText: {
+    textAlign: 'center',
     color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '700',

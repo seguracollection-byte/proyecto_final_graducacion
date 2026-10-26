@@ -52,9 +52,9 @@ app.use('/api', (_req, res) => {
 if (require.main === module) {
   const server = app.listen(
     Number(process.env.PORT || 3000),
-    '127.0.0.1',
+        '0.0.0.0',
     () => {
-      console.log('Servidor de Lomas en http://127.0.0.1:3000');
+      console.log('Servidor de Lomas en http://0.0.0.0:3000');
     }
   );
 

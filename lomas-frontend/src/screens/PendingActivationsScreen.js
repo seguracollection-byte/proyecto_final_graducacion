@@ -194,7 +194,11 @@ export default function PendingActivationsScreen({ navigation }) {
               setRefresh((value) => value + 1);
             }}
             accessibilityRole="button"
-            style={styles.button}
+            style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+              (busy || loading) && styles.faded,
+            ]}
           >
             <Text style={styles.buttonText}>Actualizar listado</Text>
           </Pressable>
@@ -240,7 +244,11 @@ export default function PendingActivationsScreen({ navigation }) {
                     disabled={busy || needsRefresh}
                     onPress={() => handleResend(request)}
                     accessibilityRole="button"
-                    style={styles.button}
+                    style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+              (busy || loading || needsRefresh) && styles.faded,
+            ]}
                   >
                     {busy ? (
                       <ActivityIndicator color={colors.onPrimary} />
@@ -269,7 +277,11 @@ export default function PendingActivationsScreen({ navigation }) {
                     setSelectedId(request.id);
                   }}
                   accessibilityRole="button"
-                  style={styles.button}
+                  style={({ pressed }) => [
+              styles.button,
+              pressed && styles.buttonPressed,
+              (busy || loading || needsRefresh) && styles.faded,
+            ]}
                 >
                   <Text style={styles.buttonText}>
                     Reenviar activación
@@ -305,32 +317,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brand: {
+    textAlign: 'center',
     color: colors.primary,
     fontSize: 16,
     fontWeight: '700',
-    flexShrink: 1,
+    flex: 1,
     marginLeft: spacing.sm,
+    marginRight: 56,
   },
   content: {
     padding: spacing.lg,
     alignItems: 'center',
   },
-  inner: { width: '100%', maxWidth: 640 },
+  inner: { width: '100%', maxWidth: 900 },
   title: {
+    textAlign: 'center',
     color: colors.text,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: spacing.md,
   },
   description: {
+    textAlign: 'center',
     color: colors.textSecondary,
     fontSize: 16,
     lineHeight: 24,
     marginVertical: spacing.md,
   },
   name: {
+    textAlign: 'center',
     color: colors.text,
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
   },
   card: {
@@ -361,12 +378,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: spacing.sm,
   },
-  linkText: { color: colors.primary, fontSize: 16 },
+  linkText: {
+    textAlign: 'center', color: colors.primary, fontSize: 16 },
   error: {
+    textAlign: 'center',
     color: colors.error,
     fontSize: 16,
     lineHeight: 24,
     marginVertical: spacing.md,
   },
+  buttonPressed: { backgroundColor: colors.primaryPressed },
+  faded: { opacity: 0.5 },
   message: { marginVertical: spacing.lg },
 });

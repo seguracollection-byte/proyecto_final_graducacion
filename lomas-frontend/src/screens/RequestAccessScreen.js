@@ -236,17 +236,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   description: {
+    textAlign: 'center',
     color: colors.textSecondary,
     fontSize: 16,
     lineHeight: 24,
     marginBottom: spacing.lg,
   },
   label: {
+    textAlign: 'center',
     color: colors.text,
     fontSize: 16,
     marginBottom: spacing.sm,
   },
   input: {
+    textAlign: 'center',
     color: colors.text,
     backgroundColor: colors.background,
     borderColor: colors.border,
@@ -258,6 +261,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   error: {
+    textAlign: 'center',
     color: colors.error,
     fontSize: 16,
     lineHeight: 24,
@@ -278,6 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.disabled,
   },
   buttonText: {
+    textAlign: 'center',
     color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '700',

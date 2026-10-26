@@ -1,13 +1,14 @@
 {
   "expo": {
-    "name": "lomas-frontend",
+    "name": "Lomas Eveneser",
     "slug": "lomas-frontend",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lomaseveneser.app"
     },
     "android": {
       "edgeToEdgeEnabled": true
@@ -15,6 +16,7 @@
     "plugins": [
       "@react-native-community/datetimepicker",
       "expo-secure-store"
-    ]
+    ],
+    "icon": "./assets/lomas-logo.png"
   }
 }

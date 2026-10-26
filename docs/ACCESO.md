@@ -236,11 +236,28 @@ La contraseña vuelve a ocultarse automáticamente a los 3 segundos.
 
 Verificación automatizada: 15 pruebas del backend aprobadas.
 
-Pendientes: limpieza de barbería, ajustes visuales restantes
-y pruebas en dispositivos.
+La limpieza de barbería y la unificación visual fueron completadas.
+Las pruebas básicas de interfaz se comprobaron en Android y iPhone físicos
+y en navegador web; ver ENTREGA-2.md para alcance y límites.
 Permanece un aviso de pointerEvents de una dependencia por revisar.
 
 
 ## Limpieza del código heredado
 
 Se retiraron las seis pantallas antiguas de barbería, sus rutas y controladores de citas, servicios, barberos y autenticación, la configuración de base reemplazada y el esquema SQL antiguo. Las rutas inexistentes responden 404. La base local y los registros de Lomas no se modificaron.
+
+
+## Correos recordados y comprobaciones móviles
+
+Login incluye la casilla Recuérdame, compacta y alineada a la izquierda.
+Solo los correos de accesos exitosos se guardan con AsyncStorage, sin
+contraseñas y sin duplicados. Se pueden seleccionar varios correos.
+Desmarcar la casilla elimina la lista local; esta preferencia no cambia
+la persistencia de sesión existente en SecureStore.
+
+El usuario confirmó login, cierre de sesión, scroll, teclado, ojito de
+3 segundos y navegación de registro en Android y iPhone físicos; también
+confirmó el funcionamiento en web en la Mac. La recuperación y el reenvío
+con correo real fueron comprobados previamente desde navegador. No se
+presentan estas comprobaciones como una auditoría completa ni como pruebas
+de todos los flujos de correo en dispositivos nativos.

@@ -2,7 +2,7 @@
 
 ## Alcance acordado
 
-Cinco cuentas personales autorizadas, todas con registro y modificación; sin registro público ni invitados. Teléfonos y tablets Android/iOS, trabajo en línea. No migrar a Flutter, Dart o Supabase.
+Inicialmente cinco personas autorizadas, sin límite fijo de cinco cuentas. Solicitud pública de acceso con aprobación administrativa, sin cuentas activas automáticas ni invitados. Todas las personas autorizadas podrán registrar y modificar información de la finca. Teléfonos y tablets Android/iOS, trabajo en línea. No migrar a Flutter, Dart o Supabase.
 
 1. Producción: kilogramos diarios por mañana y tarde; consultas por fecha/período.
 2. Ventas: solo Dos Pinos, recolección cada tres días incluidos fines de semana y feriados, sin día semanal fijo. Precio confirmado ₡425/kg, conservado en cada venta. Separar kg producidos y vendidos e importe bruto. Confirmar fecha ancla antes de proyectar recolecciones.
@@ -31,6 +31,15 @@ Preparación adelantada desde 23/10/2026; inicio originalmente previsto 23/11/20
 
 React Native dibuja pantallas nativas; Expo facilita ejecutar y empaquetar JavaScript. Node ejecuta JavaScript en el servidor; Express recibe HTTP y aplica controles. mysql2 conecta con MySQL/MariaDB, que conserva los registros compartidos.
 
-Flujo objetivo: pantalla valida para ayudar al usuario → petición HTTPS con JWT → Express verifica identidad y valida campos → consulta SQL parametrizada → respuesta → pantalla muestra resultado, vacío o error real. El servidor es quien decide permisos; ni un correo que diga admin ni ocultar un botón concede seguridad. Hoy /health no toca la BD y /api está cerrado.
+Flujo objetivo: pantalla valida para ayudar al usuario → petición HTTPS con JWT → Express verifica identidad y valida campos → consulta SQL parametrizada → respuesta → pantalla muestra resultado, vacío o error real. El servidor es quien decide permisos; ni un correo que diga admin ni ocultar un botón concede seguridad. /health no consulta la BD; las rutas de acceso de Lomas están habilitadas y las rutas inexistentes devuelven 404.
 
 Preguntas de defensa: ¿por qué kg y no litros?, ¿cómo se conserva el precio de venta?, ¿por qué cada pesaje es una fila nueva?, ¿qué impide cambiar otra contraseña?, ¿por qué AsyncStorage no sirve como fuente compartida?, ¿cómo se sabe qué animales recibió una aplicación grupal?, ¿cómo se recupera un respaldo?, ¿qué demuestra una prueba y qué no demuestra? Las respuestas deben apoyarse en requisitos y pruebas de cada etapa, sin prometer cero vulnerabilidades.
+
+
+## Entregas en Git
+
+Desde la entrega 2 se usa una rama por entrega: `entrega-2`, `entrega-3`, etc.
+Cada rama conserva el proyecto completo de frontend, backend y documentación,
+con commits que describen los cambios de esa entrega. Crear la siguiente rama
+desde la última entrega para conservar el avance. Main no se actualiza automáticamente;
+las integraciones se realizan solo cuando se acuerden. Ver ENTREGA-2.md.

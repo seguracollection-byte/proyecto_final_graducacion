@@ -9,3 +9,8 @@ Aplicación prevista para cinco personas autorizadas de una finca ganadera en Ti
 - [Revisión de dependencias](docs/DEPENDENCIAS.md)
 
 Tecnologías: React Native con Expo y JavaScript en teléfonos/tablets Android/iOS; Express sobre Node.js para la API; MySQL/MariaDB para almacenamiento. No desplegar todavía. Nunca subir datos reales de la finca ni copias de seguridad a GitHub.
+
+- [Entrega 2: alcance, pruebas y pendientes](docs/ENTREGA-2.md)
+
+El avance por entregas se conserva en ramas `entrega-N`. La entrega 2 incorpora
+pruebas físicas Android/iPhone y web; consultar EJECUCION.md para reproducirlas.

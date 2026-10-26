@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -15,6 +15,11 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, radius } from '../theme/theme';
 import PasswordInput from '../components/PasswordInput';
+import { Feather } from '@expo/vector-icons';
+import {
+    readRememberedEmails,
+    clearRememberedEmails,
+} from '../services/rememberedEmails';
 
 export default function LomasLoginScreen({ navigation }) {
     const { signIn } = useAuth();
@@ -23,9 +28,48 @@ export default function LomasLoginScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [remember, setRemember] = useState(false);
+    const [savedEmails, setSavedEmails] = useState([]);
+    const [preferencesReady, setPreferencesReady] = useState(false);
+    const [preferencesBusy, setPreferencesBusy] = useState(false);
+    const [storageError, setStorageError] = useState('');
+
+    useEffect(() => {
+        let active = true;
+        readRememberedEmails().then((emails) => {
+            if (!active) return;
+            setSavedEmails(emails);
+            setRemember(emails.length > 0);
+            setEmail(emails[0] || '');
+            setPreferencesReady(true);
+        }).catch(() => {
+            if (active) setStorageError('No se pudieron cargar los correos recordados.');
+        });
+        return () => { active = false; };
+    }, []);
+
+    async function toggleRemember() {
+        if (loading || preferencesBusy || !preferencesReady) return;
+        if (!remember) {
+            setRemember(true);
+            return;
+        }
+        setPreferencesBusy(true);
+        setStorageError('');
+        try {
+            await clearRememberedEmails();
+            setSavedEmails([]);
+            setRemember(false);
+        } catch {
+            setStorageError('No se pudieron borrar los correos. Intentá nuevamente.');
+        } finally {
+            setPreferencesBusy(false);
+        }
+    }
+
 
     async function handleLogin() {
-        if (loading) return;
+        if (loading || preferencesBusy) return;
 
         setError('');
 
@@ -37,7 +81,7 @@ export default function LomasLoginScreen({ navigation }) {
         setLoading(true);
 
         try {
-            await signIn(email, password);
+            await signIn(email, password, { rememberEmail: remember });
             setPassword('');
         } catch (requestError) {
             const status = requestError.response?.status;
@@ -101,6 +145,30 @@ export default function LomasLoginScreen({ navigation }) {
                         accessibilityLabel="Correo electrónico"
                     />
 
+                    {remember && savedEmails.length > 0 ? (
+                        <View style={styles.savedEmails}>
+                            <Text style={styles.savedLabel}>Correos recordados</Text>
+                            <ScrollView style={styles.emailList} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+                                {savedEmails.map((savedEmail) => (
+                                    <Pressable
+                                        key={savedEmail}
+                                        disabled={loading || preferencesBusy}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Usar correo ${savedEmail}`}
+                                        onPress={() => {
+                                            setEmail(savedEmail);
+                                            setPassword('');
+                                            setError('');
+                                        }}
+                                        style={styles.savedEmailButton}
+                                    >
+                                        <Text style={styles.savedEmailText}>{savedEmail}</Text>
+                                    </Pressable>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    ) : null}
+
                     <Text style={styles.label}>Contraseña</Text>
                     <PasswordInput
                         style={styles.input}
@@ -113,6 +181,20 @@ export default function LomasLoginScreen({ navigation }) {
                         accessibilityLabel="Contraseña"
                         onSubmitEditing={handleLogin}
                     />
+
+                    <Pressable
+                        onPress={toggleRemember}
+                        disabled={loading || preferencesBusy || !preferencesReady}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: remember, disabled: loading || preferencesBusy || !preferencesReady }}
+                        style={styles.rememberRow}
+                    >
+                        <Feather name={remember ? 'check-square' : 'square'} size={18} color={colors.primary} />
+                        <Text style={styles.rememberText}>Recuérdame</Text>
+                    </Pressable>
+                    {storageError ? (
+                        <Text style={styles.error} accessibilityRole="alert">{storageError}</Text>
+                    ) : null}
 
                     {error ? (
                         <Text style={styles.error} accessibilityRole="alert">
@@ -174,6 +256,20 @@ export default function LomasLoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    rememberRow: {
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start',
+        alignSelf: 'flex-start', minHeight: 44, gap: spacing.sm,
+        marginTop: -spacing.sm, marginBottom: spacing.sm,
+    },
+    rememberText: { color: colors.text, fontSize: 14 },
+    savedEmails: { marginBottom: spacing.md },
+    savedLabel: { color: colors.textSecondary, textAlign: 'center', fontSize: 14 },
+    emailList: { maxHeight: 144 },
+    savedEmailButton: {
+        minHeight: 48, justifyContent: 'center', alignItems: 'center',
+        padding: spacing.sm,
+    },
+    savedEmailText: { color: colors.primary, textAlign: 'center', fontSize: 16 },
     screen: {
         flex: 1,
         backgroundColor: colors.background,
@@ -210,17 +306,20 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     description: {
+    textAlign: 'center',
         color: colors.textSecondary,
         fontSize: 16,
         lineHeight: 24,
         marginBottom: spacing.lg,
     },
     label: {
+    textAlign: 'center',
         color: colors.text,
         fontSize: 16,
         marginBottom: spacing.sm,
     },
     input: {
+    textAlign: 'center',
         color: colors.text,
         backgroundColor: colors.background,
         borderColor: colors.border,
@@ -232,6 +331,7 @@ const styles = StyleSheet.create({
         marginBottom: spacing.md,
     },
     error: {
+    textAlign: 'center',
         color: colors.error,
         fontSize: 16,
         lineHeight: 24,
@@ -252,6 +352,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.disabled,
     },
     buttonText: {
+    textAlign: 'center',
         color: colors.onPrimary,
         fontSize: 16,
         fontWeight: '700',
