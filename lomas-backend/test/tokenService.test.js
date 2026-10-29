@@ -3,11 +3,10 @@ const assert = require('node:assert/strict');
 const jwt = require('jsonwebtoken');
 const authConfig = require('../config/auth');
 
-test('firma y verifica tokens con configuración ficticia', () => {
+test('firma sesiones MFA y rechaza tokens anteriores o inválidos', () => {
   const originalLoader = authConfig.loadAuthConfig;
   const servicePath = require.resolve('../services/tokenService');
 
-  // Clave pública de prueba: nunca usar en la aplicación.
   const config = {
     secret: 'a'.repeat(96),
     expiresIn: '1h',
@@ -25,19 +24,47 @@ test('firma y verifica tokens con configuración ficticia', () => {
       verifyAccessToken,
     } = require('../services/tokenService');
 
-    const token = createAccessToken({
+    const user = {
       id: 1,
       version_sesion: 1,
-    });
+    };
 
-    assert.deepEqual(verifyAccessToken(token), {
-      userId: 1,
-      sessionVersion: 1,
-    });
+    for (const method of ['otp', 'biometric', 'recovery']) {
+      const token = createAccessToken(user, method);
 
-    function signedToken(overrides = {}, secret = config.secret) {
+      assert.deepEqual(verifyAccessToken(token), {
+        userId: 1,
+        sessionVersion: 1,
+      });
+
+      const payload = jwt.decode(token);
+
+      assert.equal(payload.mfa, true);
+      assert.equal(payload.token_use, 'access');
+      assert.deepEqual(payload.amr, ['pwd', method]);
+    }
+
+    assert.deepEqual(
+      jwt.decode(createAccessToken(user)).amr,
+      ['pwd', 'otp']
+    );
+
+    function signedToken({
+      claims = {},
+      options = {},
+      secret = config.secret,
+      legacy = false,
+    } = {}) {
       return jwt.sign(
-        { version_sesion: 1 },
+        legacy
+          ? { version_sesion: 1 }
+          : {
+            version_sesion: 1,
+            token_use: 'access',
+            mfa: true,
+            amr: ['pwd', 'otp'],
+            ...claims,
+          },
         secret,
         {
           algorithm: 'HS256',
@@ -45,32 +72,70 @@ test('firma y verifica tokens con configuración ficticia', () => {
           audience: config.audience,
           subject: '1',
           expiresIn: '1h',
-          ...overrides,
+          ...options,
         }
       );
     }
 
     assert.throws(() =>
-      verifyAccessToken(signedToken({ expiresIn: -1 }))
+      verifyAccessToken(signedToken({ legacy: true }))
+    );
+
+    for (const claims of [
+      { mfa: false },
+      { mfa: 'true' },
+      { token_use: 'challenge' },
+      { amr: ['pwd'] },
+      { amr: ['otp'] },
+      { amr: ['biometric'] },
+      { amr: ['pwd', 'pwd'] },
+      { amr: ['pwd', 'desconocido'] },
+      { amr: ['pwd', 'otp', 'biometric'] },
+      { amr: null },
+      { version_sesion: 0 },
+    ]) {
+      assert.throws(() =>
+        verifyAccessToken(signedToken({ claims }))
+      );
+    }
+
+    for (const options of [
+      { expiresIn: -1 },
+      { issuer: 'otro-servidor' },
+      { audience: 'otra-app' },
+      { algorithm: 'HS384' },
+      { subject: '0' },
+    ]) {
+      assert.throws(() =>
+        verifyAccessToken(signedToken({ options }))
+      );
+    }
+
+    assert.throws(() =>
+      verifyAccessToken(
+        signedToken({ secret: 'b'.repeat(96) })
+      )
+    );
+
+    const token = createAccessToken(user);
+    const parts = token.split('.');
+    const payload = jwt.decode(token);
+
+    parts[1] = Buffer
+      .from(JSON.stringify({
+        ...payload,
+        sub: '999',
+        amr: ['pwd', 'biometric'],
+      }))
+      .toString('base64url');
+
+    assert.throws(() =>
+      verifyAccessToken(parts.join('.'))
     );
 
     assert.throws(() =>
-      verifyAccessToken(signedToken({}, 'b'.repeat(96)))
+      verifyAccessToken('token-invalido')
     );
-
-    assert.throws(() =>
-      verifyAccessToken(signedToken({ issuer: 'otro-servidor' }))
-    );
-
-    assert.throws(() =>
-      verifyAccessToken(signedToken({ audience: 'otra-app' }))
-    );
-
-    assert.throws(() =>
-      verifyAccessToken(signedToken({ algorithm: 'HS384' }))
-    );
-
-    assert.throws(() => verifyAccessToken('token-invalido'));
 
     assert.throws(() =>
       createAccessToken({ id: 0, version_sesion: 1 })
@@ -78,6 +143,10 @@ test('firma y verifica tokens con configuración ficticia', () => {
 
     assert.throws(() =>
       createAccessToken({ id: 1, version_sesion: 0 })
+    );
+
+    assert.throws(() =>
+      createAccessToken(user, 'desconocido')
     );
   } finally {
     authConfig.loadAuthConfig = originalLoader;

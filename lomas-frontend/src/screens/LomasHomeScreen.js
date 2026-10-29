@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   ActivityIndicator,
   Platform,
@@ -9,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { colors, spacing, radius } from '../theme/theme';
 
@@ -36,21 +38,23 @@ export default function LomasHomeScreen({ navigation }) {
     try {
       await signOut();
     } catch {
-      setError('No se pudo cerrar la sesión. Intentá nuevamente.');
+      setError(
+        'No se pudo cerrar la sesión. Intentá nuevamente.'
+      );
     } finally {
       setClosing(false);
     }
   }
 
-  function handleOpenAdmin(event) {
+  function openScreen(event, screen) {
     if (Platform.OS === 'web') {
-      event.currentTarget?.blur?.();
+      event?.currentTarget?.blur?.();
     }
 
-    navigation.navigate('AdminAccess');
+    navigation.navigate(screen);
   }
 
-  // La pantalla puede seguir montada durante la transición al login.
+  // Evita leer una cuenta eliminada durante el cierre de sesión.
   if (!user) {
     return <View style={styles.screen} />;
   }
@@ -64,17 +68,32 @@ export default function LomasHomeScreen({ navigation }) {
     >
       <View style={styles.container}>
         <Text style={styles.brand}>LOMAS EVENESER</Text>
-        <Text style={styles.title}>Hola, {user.nombre}</Text>
 
-        <Text style={styles.description}>
-          {user.rol === 'administrador'
-            ? 'Cuenta administradora'
-            : 'Cuenta de usuario'}
-        </Text>
+        <View style={styles.profileRow}>
+          <View style={styles.gearSpacer} />
+          <View style={styles.profileText}>
+            <Text style={styles.title}>Hola, {user.nombre}</Text>
+            <Text style={styles.description}>
+              {user.rol === 'administrador' ? 'Cuenta administradora' : 'Cuenta de usuario'}
+            </Text>
+          </View>
+          <Pressable
+            onPress={(event) => openScreen(event, 'AccountSettings')}
+            disabled={closing}
+            accessibilityRole="button"
+            accessibilityLabel="Ajustes y seguridad de mi cuenta"
+            style={({ pressed }) => [styles.gear, pressed && { opacity: 0.65 }]}
+          >
+            <Feather name="settings" size={23} color={colors.primary} />
+          </Pressable>
+        </View>
 
         {user.rol === 'administrador' ? (
           <Pressable
-            onPress={handleOpenAdmin}
+            onPress={(event) => openScreen(
+              event,
+              'AdminAccess'
+            )}
             disabled={closing}
             accessibilityRole="button"
             accessibilityLabel="Administrar solicitudes de acceso"
@@ -84,9 +103,11 @@ export default function LomasHomeScreen({ navigation }) {
             <Text style={styles.cardTitle}>
               Administración de acceso
             </Text>
+
             <Text style={styles.description}>
               Revisá las solicitudes pendientes.
             </Text>
+
             <Text style={styles.pending}>
               Ver solicitudes
             </Text>
@@ -97,20 +118,32 @@ export default function LomasHomeScreen({ navigation }) {
           Registros de la finca
         </Text>
 
-        {modules.map(([title, description]) => (
-          <View key={title} style={styles.card}>
-            <Text style={styles.cardTitle}>{title}</Text>
+        <View style={styles.modules}>
+        {modules.map(([title, description], index) => (
+          <View key={title} style={[styles.card, styles.moduleCard]}>
+            <View style={styles.moduleIcon}>
+              <Feather name={['droplet', 'dollar-sign', 'sun', 'activity', 'package', 'shield'][index]} size={24} color={colors.primary} />
+            </View>
+            <Text style={styles.cardTitle}>
+              {title}
+            </Text>
+
             <Text style={styles.description}>
               {description}
             </Text>
+
             <Text style={styles.pending}>
               Módulo pendiente
             </Text>
           </View>
         ))}
+        </View>
 
         {error ? (
-          <Text style={styles.error} accessibilityRole="alert">
+          <Text
+            style={styles.error}
+            accessibilityRole="alert"
+          >
             {error}
           </Text>
         ) : null}
@@ -155,6 +188,13 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 900,
   },
+  profileRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: spacing.lg },
+  profileText: { flex: 1, minWidth: 0 },
+  gearSpacer: { width: 44 },
+  gear: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: radius.button, backgroundColor: colors.surface },
+  modules: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.md },
+  moduleCard: { flexGrow: 1, flexBasis: 300, maxWidth: '100%', marginBottom: 0, justifyContent: 'center' },
+  moduleIcon: { alignSelf: 'center', marginBottom: spacing.md },
   brand: {
     textAlign: 'center',
     color: colors.primary,

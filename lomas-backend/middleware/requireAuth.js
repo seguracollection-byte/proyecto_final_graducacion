@@ -4,7 +4,8 @@ const { getLomasPool } = require('../config/lomasDatabase');
 function unauthorized(res) {
   return res.status(401).json({
     success: false,
-    message: 'Sesión inválida o vencida. Iniciá sesión nuevamente.',
+    message:
+      'Sesión inválida o vencida. Iniciá sesión nuevamente.',
   });
 }
 
@@ -49,12 +50,18 @@ async function requireAuth(req, res, next) {
       email: user.email,
       rol: user.rol,
     };
+
+    // Datos internos obtenidos del token verificado.
+    req.auth = {
+      sessionVersion: session.sessionVersion,
+    };
   } catch {
     console.error('No se pudo comprobar la sesión.');
 
     return res.status(503).json({
       success: false,
-      message: 'No se pudo comprobar la sesión. Intentá más tarde.',
+      message:
+        'No se pudo comprobar la sesión. Intentá más tarde.',
     });
   }
 

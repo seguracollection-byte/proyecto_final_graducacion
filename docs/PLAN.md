@@ -43,3 +43,11 @@ Cada rama conserva el proyecto completo de frontend, backend y documentación,
 con commits que describen los cambios de esa entrega. Crear la siguiente rama
 desde la última entrega para conservar el avance. Main no se actualiza automáticamente;
 las integraciones se realizan solo cuando se acuerden. Ver ENTREGA-2.md.
+
+## Cierre de entrega 3 — 29/10/2026
+
+Implementados TOTP, Face ID/huella, uso de códigos de recuperación, acceso Mi cuenta
+con engranaje en Home y revisión de dependencias. Respaldo por entrega en `entrega-3`.
+Ver [ENTREGA-3.md](ENTREGA-3.md). Próxima validación: revisión del usuario de la nueva
+UI y recuperación en sus dispositivos. Permanecen pendientes módulos ganaderos,
+servidor HTTPS, publicación y avisos bajos de deepmerge.

@@ -42,3 +42,52 @@ En frontend quedan avisos en dependencias de Expo/Metro, navegación y utilidade
 AsyncStorage guarda datos locales en el dispositivo y no cifra su contenido; no será la fuente compartida ni el lugar para contraseñas. Axios hace peticiones HTTP desde las pantallas. mysql2 ejecuta consultas desde el servidor. Las dependencias indirectas vienen incluidas por otras bibliotecas y también requieren revisión. Una auditoría sin críticos no equivale a una aplicación segura: siguen pendientes autenticación y pruebas de autorización.
 
 Fuentes: [Expo AsyncStorage](https://docs.expo.dev/versions/v54.0.0/sdk/async-storage/), [versiones de mysql2](https://github.com/sidorares/node-mysql2/releases), [avisos de shell-quote del mantenedor](https://github.com/ljharb/shell-quote/security/advisories). La compatibilidad concreta de SDK 54 se verificó además con node_modules/expo/bundledNativeModules.json.
+
+## Actualización — entrega 3, 29/10/2026
+
+Esta sección reemplaza el estado de riesgo anterior para la entrega actual.
+
+| Auditoría npm actual | Antes de esta revisión | Después |
+| --- | --- | --- |
+| Backend | 0 | **0 avisos** |
+| Frontend | 12: 2 altos, 3 moderados, 7 bajos | **10 bajos; 0 altos, moderados o críticos** |
+
+El conteo incluye paquetes afectados indirectamente. Los diez avisos bajos parten
+de `deepmerge` 4.3.1 y se propagan a dependencias de configuración de Expo; no son
+diez fallos independientes demostrados en la aplicación. El aviso
+[GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4)
+no publica una versión corregida en la fecha consultada. Se mantiene explícitamente
+pendiente; no se oculta ni se promete invulnerabilidad. No procesar configuración
+Expo de terceros no confiables. Metro queda exclusivamente para desarrollo en la
+red de pruebas, sin exponerlo a Internet.
+
+Correcciones fijadas mediante `overrides`, conservando SDK 54:
+
+- `postcss`: 8.4.49 → **8.5.32**, dentro de la versión mayor 8.
+- `image-size`: 1.2.1 → **2.0.4**, analizadores de imágenes corregidos.
+
+`image-size` 2 recibe bytes en lugar de rutas. Metro 0.83.3 todavía entrega una ruta
+en una de sus llamadas: `scripts/patch-metro-assets.js` adapta únicamente esa llamada
+para leer los bytes antes de medir la imagen. Se aplica con `postinstall`, comprueba
+la versión y el texto esperado y falla si Metro cambia inesperadamente. No modifica
+el SDK ni los archivos nativos. Si se instala con `--ignore-scripts`, ejecutar:
+
+```sh
+cd lomas-frontend
+node scripts/patch-metro-assets.js
+```
+
+Se verificaron lectura del logo, parser PostCSS y exportación completa de bundles
+web, Android e iOS. Antes de esta corrección, cambiar únicamente la versión de
+image-size rompía el empaquetado; la adaptación es parte necesaria de la solución.
+El lockfile conserva el árbol exacto. No se utilizó `npm audit fix --force` ni la
+propuesta de bajar Expo a SDK 51. Los parches anteriores realizados con
+`npm audit fix --ignore-scripts` también quedan registrados en el lockfile.
+
+Nuevas dependencias funcionales: backend `otpauth` **9.5.2** y frontend
+`@sbaiahmed1/react-native-biometrics` **0.17.0**. El módulo biométrico requiere
+compilación nativa; Expo Go mantiene disponible TOTP y recuperación.
+
+Evidencia completa de la auditoría: [AUDITORIA-ENTREGA-3.json](AUDITORIA-ENTREGA-3.json).
+Fuentes: [versiones de image-size](https://github.com/image-size/image-size/releases),
+[versiones de PostCSS](https://github.com/postcss/postcss/releases).

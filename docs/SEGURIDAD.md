@@ -11,3 +11,14 @@ Rotar la contraseña del usuario de BD de la barbería y revocar/reemplazar la c
 Antes de cada commit revisar archivos staged, buscar secretos y datos personales y revisar el diff. Un escáner por patrones puede tener falsos negativos. No incluir .git heredados, respaldos ni datos reales. GitHub puede usar autenticación de macOS/browser; si falla, configurar un gestor de credenciales o GitHub CLI con login en navegador. Nunca pegar tokens/contraseñas en el chat ni incluirlos en URLs.
 
 El diagnóstico usa HTTP solo en loopback. Antes de abrir acceso por LAN o desplegar, reparar autenticación, evaluar dependencias, configurar orígenes y HTTPS. No se autorizó despliegue ni correos reales. Backups de la finca se administran aparte de GitHub.
+
+## Estado de seguridad — entrega 3
+
+Se incorporó MFA obligatorio antes de emitir sesión, biometría con prueba de clave
+vinculada y códigos de recuperación de un uso. Ver [MFA.md](MFA.md) para restricciones,
+modelo de amenazas y límites. La API ya no muestra `X-Powered-By`, devuelve errores
+JSON genéricos para cuerpos inválidos/grandes y marca las respuestas API `no-store`.
+
+Auditoría del 29/10/2026: backend 0 avisos; frontend 10 bajos, 0 altos/moderados/críticos.
+La dependencia indirecta deepmerge sigue pendiente. Esto no garantiza ausencia de
+vulnerabilidades; detalles y evidencia en [DEPENDENCIAS.md](DEPENDENCIAS.md).

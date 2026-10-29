@@ -14,3 +14,9 @@ Tecnologías: React Native con Expo y JavaScript en teléfonos/tablets Android/i
 
 El avance por entregas se conserva en ramas `entrega-N`. La entrega 2 incorpora
 pruebas físicas Android/iPhone y web; consultar EJECUCION.md para reproducirlas.
+
+### Entrega 3
+
+Segundo factor obligatorio con Authenticator, biometría y códigos de recuperación;
+Home organizado y Mi cuenta. [Resumen de entrega 3](docs/ENTREGA-3.md),
+[funcionamiento del 2FA](docs/MFA.md) y [revisión de dependencias](docs/DEPENDENCIAS.md).

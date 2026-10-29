@@ -89,3 +89,12 @@ No hay backend público HTTPS, funcionamiento sin Internet ni distribución de p
 
 Las migraciones de acceso ya fueron aplicadas; no repetir la migración inicial.
 Los módulos ganaderos tendrán migraciones nuevas. Datos y respaldos quedan fuera de Git.
+
+## Entrega 3
+
+Al instalar frontend con `npm install`/`npm ci`, `postinstall` aplica la adaptación de
+Metro para el parser de imágenes corregido. Si se usa `--ignore-scripts`, ejecutar
+`node scripts/patch-metro-assets.js` desde `lomas-frontend` antes de arrancar Expo.
+No regenerar iOS con `prebuild --clean`: hay ajustes nativos de UIScene preservados.
+Face ID/huella requieren la app nativa; Expo Go permite Authenticator y recuperación.
+Las migraciones 002 y 003 ya se aplicaron en esta máquina. Documentación [MFA](MFA.md).

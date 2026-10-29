@@ -261,3 +261,14 @@ confirmó el funcionamiento en web en la Mac. La recuperación y el reenvío
 con correo real fueron comprobados previamente desde navegador. No se
 presentan estas comprobaciones como una auditoría completa ni como pruebas
 de todos los flujos de correo en dispositivos nativos.
+
+## Entrega 3 — segundo factor y Mi cuenta
+
+El login ahora devuelve un desafío MFA y no una sesión completa después de la
+contraseña. Se completa con Authenticator, biometría vinculada o un código de
+recuperación de un solo uso. La explicación técnica y los endpoints están en
+[MFA.md](MFA.md). Home contiene un engranaje junto al nombre para abrir **Mi cuenta**,
+consultar datos, configurar biometría o solicitar un enlace de cambio de contraseña.
+
+Respaldo del avance en rama `entrega-3`; resumen, pruebas y límites en
+[ENTREGA-3.md](ENTREGA-3.md). No sobrescribir `main` ni reescribir `entrega-2`.

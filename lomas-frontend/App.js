@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   ActivityIndicator,
   Platform,
@@ -8,18 +9,26 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+
 import {
   DarkTheme,
   NavigationContainer,
 } from '@react-navigation/native';
+
 import { createStackNavigator } from '@react-navigation/stack';
+
 import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
+
 import { StatusBar } from 'expo-status-bar';
 
-import { AuthProvider, useAuth } from './src/context/AuthContext';
+import {
+  AuthProvider,
+  useAuth,
+} from './src/context/AuthContext';
+
 import LomasLoginScreen from './src/screens/LomasLoginScreen';
 import LomasHomeScreen from './src/screens/LomasHomeScreen';
 import ActivateAccountScreen from './src/screens/ActivateAccountScreen';
@@ -28,8 +37,16 @@ import AdminAccessScreen from './src/screens/AdminAccessScreen';
 import PendingActivationsScreen from './src/screens/PendingActivationsScreen';
 import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
 import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
+import MfaScreen from './src/screens/MfaScreen';
+import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
+import BiometricSettingsScreen from './src/screens/BiometricSettingsScreen';
 
-import { colors, spacing, radius } from './src/theme/theme';
+import {
+  colors,
+  spacing,
+  radius,
+} from './src/theme/theme';
+
 import { linking } from './src/navigation/linking';
 
 const Stack = createStackNavigator();
@@ -52,6 +69,7 @@ function AppNavigation() {
     loading,
     sessionError,
     restoreSession,
+    pendingMfa,
   } = useAuth();
 
   if (loading) {
@@ -61,6 +79,7 @@ function AppNavigation() {
           size="large"
           color={colors.primary}
         />
+
         <Text style={styles.message}>
           Comprobando sesión…
         </Text>
@@ -97,7 +116,7 @@ function AppNavigation() {
   return (
     <NavigationContainer
       theme={navigationTheme}
-      linking={user ? undefined : linking}
+      linking={user || pendingMfa ? undefined : linking}
     >
       <Stack.Navigator
         screenOptions={{
@@ -110,10 +129,16 @@ function AppNavigation() {
         }}
       >
         {user ? (
-          <>
+          <Stack.Group navigationKey="authenticated">
             <Stack.Screen
               name="Home"
               component={LomasHomeScreen}
+            />
+
+            <Stack.Screen name="AccountSettings" component={AccountSettingsScreen} />
+            <Stack.Screen
+              name="BiometricSettings"
+              component={BiometricSettingsScreen}
             />
 
             {user.rol === 'administrador' ? (
@@ -122,15 +147,26 @@ function AppNavigation() {
                   name="AdminAccess"
                   component={AdminAccessScreen}
                 />
+
                 <Stack.Screen
                   name="PendingActivations"
                   component={PendingActivationsScreen}
                 />
               </>
             ) : null}
-          </>
+          </Stack.Group>
+        ) : pendingMfa ? (
+          <Stack.Group navigationKey="mfa">
+            <Stack.Screen
+              name="Mfa"
+              component={MfaScreen}
+              options={{
+                gestureEnabled: false,
+              }}
+            />
+          </Stack.Group>
         ) : (
-          <>
+          <Stack.Group navigationKey="public">
             <Stack.Screen
               name="Login"
               component={LomasLoginScreen}
@@ -155,7 +191,7 @@ function AppNavigation() {
               name="ResetPassword"
               component={ResetPasswordScreen}
             />
-          </>
+          </Stack.Group>
         )}
       </Stack.Navigator>
     </NavigationContainer>

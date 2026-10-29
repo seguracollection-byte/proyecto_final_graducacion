@@ -1,20 +1,31 @@
 const jwt = require('jsonwebtoken');
 const { loadAuthConfig } = require('../config/auth');
 
-function createAccessToken(user) {
+const SECOND_FACTORS = ['otp', 'biometric', 'recovery'];
+
+function createAccessToken(user, secondFactor = 'otp') {
   if (
+    !user ||
     !Number.isSafeInteger(user.id) ||
     user.id <= 0 ||
     !Number.isSafeInteger(user.version_sesion) ||
-    user.version_sesion <= 0
+    user.version_sesion <= 0 ||
+    !SECOND_FACTORS.includes(secondFactor)
   ) {
     throw new Error('Datos de sesión inválidos');
   }
 
   const config = loadAuthConfig();
 
+  // El backend selecciona el método después de verificarlo.
+  // Nunca tomar este valor directamente del cuerpo de la petición.
   return jwt.sign(
-    { version_sesion: user.version_sesion },
+    {
+      version_sesion: user.version_sesion,
+      token_use: 'access',
+      mfa: true,
+      amr: ['pwd', secondFactor],
+    },
     config.secret,
     {
       algorithm: config.algorithm,
@@ -42,7 +53,15 @@ function verifyAccessToken(token) {
     !Number.isSafeInteger(Number(payload.sub)) ||
     !Number.isSafeInteger(payload.version_sesion) ||
     payload.version_sesion <= 0 ||
-    !Number.isInteger(payload.exp)
+    !Number.isInteger(payload.exp) ||
+    payload.token_use !== 'access' ||
+    payload.mfa !== true ||
+    !Array.isArray(payload.amr) ||
+    payload.amr.length !== 2 ||
+    !payload.amr.includes('pwd') ||
+    !SECOND_FACTORS.some(
+      (factor) => payload.amr.includes(factor)
+    )
   ) {
     throw new Error('Contenido del token inválido');
   }
@@ -53,4 +72,7 @@ function verifyAccessToken(token) {
   };
 }
 
-module.exports = { createAccessToken, verifyAccessToken };
+module.exports = {
+  createAccessToken,
+  verifyAccessToken,
+};

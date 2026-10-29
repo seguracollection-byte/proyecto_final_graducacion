@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('node:crypto');
+
 const { getLomasPool } = require('../config/lomasDatabase');
-const { createAccessToken } = require('../services/tokenService');
+
+const {
+  createMfaChallenge,
+} = require('../services/mfaChallengeService');
 
 // Permite comparar incluso cuando la cuenta no existe,
 // reduciendo diferencias evidentes de tiempo entre respuestas.
@@ -11,6 +15,8 @@ const dummyHash = bcrypt.hashSync(
 );
 
 async function login(req, res) {
+  res.set('Cache-Control', 'no-store');
+
   const { email, password } = req.body;
 
   try {
@@ -25,7 +31,11 @@ async function login(req, res) {
 
     const user = rows[0];
     const hash = user?.password_hash || dummyHash;
-    const matches = await bcrypt.compare(password, hash);
+
+    const matches = await bcrypt.compare(
+      password,
+      hash
+    );
 
     if (
       !user ||
@@ -39,26 +49,27 @@ async function login(req, res) {
       });
     }
 
-    const token = createAccessToken(user);
+    const pendingMfa = await createMfaChallenge(user);
 
-    res.set('Cache-Control', 'no-store');
-
-    return res.status(200).json({
+    // Todavía no se entrega un token de sesión.
+    return res.status(202).json({
       success: true,
-      token,
-      user: {
-        id: user.id,
-        nombre: user.nombre,
-        email: user.email,
-        rol: user.rol,
-      },
+      mfaRequired: true,
+      challenge: pendingMfa.challenge,
+      nextStep: pendingMfa.purpose,
+      expiresIn: pendingMfa.expiresIn,
+      message:
+        pendingMfa.purpose === 'configuracion'
+          ? 'Configurá Authenticator para completar tu ingreso.'
+          : 'Ingresá el código de Authenticator para completar tu ingreso.',
     });
   } catch {
     console.error('No se pudo procesar el inicio de sesión.');
 
     return res.status(503).json({
       success: false,
-      message: 'No se pudo iniciar sesión. Intentá más tarde.',
+      message:
+        'No se pudo iniciar sesión. Intentá más tarde.',
     });
   }
 }
